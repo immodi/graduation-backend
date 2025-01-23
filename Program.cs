@@ -19,7 +19,15 @@ var summaries = new[]
     "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
 };
 
-app.MapGet("/", () => "Hello, World");
+app.MapGet("/", () => 
+{
+    var response = new 
+    {
+        Message = "Hello, World",
+        Timestamp = DateTime.UtcNow
+    };
+    return Results.Json(response);
+});
 
 app.MapGet("/weatherforecast", () =>
     {

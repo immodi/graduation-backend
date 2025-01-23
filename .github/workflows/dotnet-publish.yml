@@ -3,10 +3,8 @@ name: .NET Build and Release
 on:
   workflow_dispatch:
   push:
-    branches:
-      - 'master'
     tags:
-      - 'v*'
+      - 'v*'  # Trigger only on new tags matching 'v*'
 
 jobs:
   build-and-release:
@@ -25,7 +23,7 @@ jobs:
 
       - name: Build and Publish
         run: |
-          dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true
+          dotnet publish -c Release -r linux-x64 --self-contained true -p:PublishSingleFile=true -o ./publish
 
       - name: Create Release
         id: create_release
@@ -33,7 +31,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
+          tag_name: ${{ github.ref_name }}  # Use the tag name that triggered the workflow
           release_name: Release ${{ github.ref_name }}
           draft: false
           prerelease: false
@@ -44,6 +42,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: bin/Release/net9.0/linux-x64/publish/backend
+          asset_path: ./publish/backend  # Updated path to the published file
           asset_name: backend
           asset_content_type: application/octet-stream
