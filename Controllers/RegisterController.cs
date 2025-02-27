@@ -1,3 +1,4 @@
+using backend.DTOs.Responses;
 using backend.Services;
 using Microsoft.AspNetCore.Mvc;
 
@@ -5,14 +6,14 @@ namespace backend.Controllers;
 
 public class RegisterController(JwtService jwtService, [FromBody] string username)
 {
-    public object RegisterUser()
+    public BaseResponse RegisterUser()
     {
         if (string.IsNullOrEmpty(username))
         {
-            return Results.BadRequest("Username is required");
+            return new ErrorResponse("Username is required");
         }
 
         var token = jwtService.GenerateToken(username);
-        return new { token };
+        return new RegisterResponse(token);
     }
 }

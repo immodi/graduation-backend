@@ -8,12 +8,129 @@
   </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="Docker.DotNet" Version="3.125.15" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+        <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
     </ItemGroup>
 
     <ItemGroup>
       <Content Include=".github\workflows\dotnet-publish.yml" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Models\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="publish\appsettings.json" />
+      <_ContentIncludedByDefault Remove="publish\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="publish\publish\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="publish\publish\appsettings.json" />
+      <_ContentIncludedByDefault Remove="publish\publish\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\out\web.config" />
+      <_ContentIncludedByDefault Remove="out\web.config" />
+      <_ContentIncludedByDefault Remove="out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.Development.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\appsettings.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.deps.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.runtimeconfig.json" />
+      <_ContentIncludedByDefault Remove="out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\out\backend.staticwebassets.endpoints.json" />
     </ItemGroup>
 
 </Project>

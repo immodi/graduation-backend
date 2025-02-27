@@ -1,0 +1,42 @@
+using System.Text;
+using backend.DTOs.Responses;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+
+namespace backend.Services;
+
+public static class HandleAuthenticationClass
+{
+    public static AuthenticationBuilder HandleAuthentication(this IServiceCollection services, string jwtIssuer, string jwtKey)
+    {
+        return services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = false, // Optional: Set to `true` if needed
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = jwtIssuer,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
+                };
+
+                options.Events = new JwtBearerEvents
+                {
+                    OnChallenge = async context =>
+                    {
+                        context.HandleResponse(); 
+
+                        var response = Results.Json(
+                            new ErrorResponse("Unauthorized access") { StatusCode = 401 },
+                            statusCode: 401
+                        );
+
+                        await response.ExecuteAsync(context.HttpContext);
+                    }
+                };
+            });
+    }
+}

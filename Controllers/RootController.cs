@@ -1,14 +1,13 @@
+using backend.DTOs.Responses;
+using backend.Helpers;
+
 namespace backend.Controllers;
 
 public class RootController
 {
-    private readonly string[] _supportedLanguages = ["javascript", "csharp", "python"];
-    public object Index()
+    private readonly string[] _supportedLanguages = ProgrammingLanguages.Commands.Keys.ToArray();
+    public BaseResponse Index()
     {
-        return new
-        {
-            supportedLanguages = _supportedLanguages,
-            date = DateTime.Now
-        };
+        return new LanguagesResponse(_supportedLanguages);
     }
 }
