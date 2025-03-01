@@ -16,12 +16,15 @@ public static class HandleAuthenticationClass
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
-                    ValidateAudience = false, // Optional: Set to `true` if needed
+                    ValidateAudience = false,
                     ValidateLifetime = true,
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = jwtIssuer,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
                 };
+                
+                Console.WriteLine(jwtIssuer);
+                Console.WriteLine(jwtKey);
 
                 options.Events = new JwtBearerEvents
                 {
