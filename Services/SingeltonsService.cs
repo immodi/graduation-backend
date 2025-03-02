@@ -4,7 +4,7 @@ namespace backend.Services;
 
 public static class SingeltonsService
 {
-    private static readonly string DbPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "db.db");
+    private static readonly string DbPath = Path.Combine(AppContext.BaseDirectory, "db.db");
     
     public static void AddCustomSingeltons(this IServiceCollection services)
     {
