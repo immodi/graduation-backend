@@ -7,18 +7,22 @@
       <UserSecretsId>968ab3c7-4890-4d8c-96ac-7c6439d86b95</UserSecretsId>
   </PropertyGroup>
 
-    <ItemGroup>
-        <PackageReference Include="Docker.DotNet" Version="3.125.15" />
-        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
-        <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
-        <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
-    </ItemGroup>
+  <ItemGroup>
+      <PackageReference Include="Docker.DotNet" Version="3.125.15" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+      <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
+      <PackageReference Include="sqlite-net-pcl" Version="1.9.172" />
+  </ItemGroup>
 
-    <ItemGroup>
-      <Content Include=".github\workflows\dotnet-publish.yml" />
-    </ItemGroup>
+  <ItemGroup>
+    <Content Include=".github\workflows\dotnet-publish.yml" />
+  </ItemGroup>
 
-    <ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Static\reference.html" />
+  </ItemGroup>
+  
+  <ItemGroup>
       <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
       <_ContentIncludedByDefault Remove="publish\appsettings.json" />
       <_ContentIncludedByDefault Remove="publish\backend.staticwebassets.endpoints.json" />

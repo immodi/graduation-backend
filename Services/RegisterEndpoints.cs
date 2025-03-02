@@ -1,3 +1,4 @@
+using System.Reflection;
 using backend.Controllers;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
@@ -13,8 +14,18 @@ public static class WebApplicationExtension
         app.Map("/", () => new RootController().Index().ToResult());
         app.Map("/doc", async (context) =>
         {
-            await context.Response.SendFileAsync("Static/reference.html");
-        });        
+            var assembly = Assembly.GetExecutingAssembly();
+            var resourceName = $"{assembly.GetName().Name}.Static.reference.html";
+            await using var stream = assembly.GetManifestResourceStream(resourceName);
+            if (stream == null)
+            {
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("File not found.");
+                return;
+            }
+            context.Response.ContentType = "text/html";
+            await stream.CopyToAsync(context.Response.Body);
+        });       
         
         app.MapPost("/login", async (JwtService jwtService, DatabaseService databaseService, [FromBody] AuthRequest registerRequest) =>
         (await new LoginController(jwtService, databaseService, registerRequest).LoginUser()).ToResult());
