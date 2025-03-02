@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Documentation</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 40px; background-color: #f8f9fa; color: #333; transition: background 0.3s, color 0.3s; }
+        h1, h2 { color: #007bff; }
+        pre { background: #282c34; color: #abb2bf; padding: 15px; border-radius: 5px; overflow-x: auto; }
+        code { font-family: "Courier New", Courier, monospace; color: #e83e8c; }
+        .endpoint { padding: 10px; border-left: 4px solid #007bff; background: #fff; margin: 20px 0; transition: background 0.3s; }
+        .dark-mode { background-color: #121212; color: #f8f9fa; }
+        .main-header {display: flex; width: 100%; height: fit-content; justify-content: space-between; align-items: center; }
+        .dark-mode .endpoint { background: #1e1e1e; }
+        .dark-mode h1, .dark-mode h2 { color: #4db8ff; }
+        .dark-mode pre { background: #333; color: #f8f9fa; }
+        .dark-mode-btn { border: none; cursor: pointer; }
+        .moon {display: none;}
+        .sun {display: flex;}
+    </style>
+</head>
+<body class="dark-mode">
+    <div class="main-header">
+        <h1>API Documentation</h1>
+        <svg class="dark-mode-btn sun" onclick="toggleDarkMode()" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="50" height="50" viewBox="0,0,256,256">
+            <g fill="#ffffff" fill-rule="nonzero" stroke="none" stroke-width="1" stroke-linecap="butt" stroke-linejoin="miter" stroke-miterlimit="10" stroke-dasharray="" stroke-dashoffset="0" font-family="none" font-weight="none" font-size="none" text-anchor="none" style="mix-blend-mode: normal"><g transform="scale(5.12,5.12)"><path d="M24.98438,3.98633c-0.55152,0.00862 -0.99193,0.46214 -0.98437,1.01367v6c-0.0051,0.36064 0.18438,0.69608 0.49587,0.87789c0.3115,0.18181 0.69676,0.18181 1.00825,0c0.3115,-0.18181 0.50097,-0.51725 0.49587,-0.87789v-6c0.0037,-0.2703 -0.10218,-0.53059 -0.29351,-0.72155c-0.19133,-0.19097 -0.45182,-0.29634 -0.72212,-0.29212zM10.84766,9.84766c-0.40692,0.00011 -0.77321,0.24676 -0.92633,0.62377c-0.15312,0.37701 -0.06255,0.80921 0.22907,1.09303l4.24414,4.24414c0.25082,0.26123 0.62326,0.36645 0.9737,0.27509c0.35043,-0.09136 0.6241,-0.36502 0.71546,-0.71546c0.09136,-0.35043 -0.01386,-0.72288 -0.27509,-0.9737l-4.24414,-4.24414c-0.18827,-0.19353 -0.4468,-0.30272 -0.7168,-0.30273zM39.12305,9.84766c-0.2598,0.00774 -0.50638,0.11632 -0.6875,0.30273l-4.24414,4.24414c-0.26123,0.25082 -0.36645,0.62326 -0.27509,0.9737c0.09136,0.35043 0.36502,0.6241 0.71546,0.71546c0.35043,0.09136 0.72288,-0.01386 0.9737,-0.27509l4.24414,-4.24414c0.29576,-0.28749 0.38469,-0.72707 0.22393,-1.10691c-0.16075,-0.37985 -0.53821,-0.62204 -0.9505,-0.60988zM25,15c-0.14111,-0.00126 -0.28089,0.02737 -0.41016,0.08398c-5.30494,0.22876 -9.58984,4.55683 -9.58984,9.91602c0,5.50541 4.49561,10 10,10c5.50528,0 10,-4.49472 10,-10c0,-5.35772 -4.28205,-9.68524 -9.58594,-9.91602c-0.13047,-0.05716 -0.27164,-0.08579 -0.41406,-0.08398zM25,17c4.42059,0 8,3.58039 8,8c0,4.42072 -3.57928,8 -8,8c-4.41961,0 -8,-3.57941 -8,-8c0,-4.41948 3.58052,-8 8,-8zM5,24c-0.36064,-0.0051 -0.69608,0.18438 -0.87789,0.49587c-0.18181,0.3115 -0.18181,0.69676 0,1.00825c0.18181,0.3115 0.51725,0.50097 0.87789,0.49587h6c0.36064,0.0051 0.69608,-0.18438 0.87789,-0.49587c0.18181,-0.3115 0.18181,-0.69676 0,-1.00825c-0.18181,-0.3115 -0.51725,-0.50097 -0.87789,-0.49587zM39,24c-0.36064,-0.0051 -0.69608,0.18438 -0.87789,0.49587c-0.18181,0.3115 -0.18181,0.69676 0,1.00825c0.18181,0.3115 0.51725,0.50097 0.87789,0.49587h6c0.36064,0.0051 0.69608,-0.18438 0.87789,-0.49587c0.18181,-0.3115 0.18181,-0.69676 0,-1.00825c-0.18181,-0.3115 -0.51725,-0.50097 -0.87789,-0.49587zM15.08203,33.89063c-0.2598,0.00774 -0.50638,0.11632 -0.6875,0.30273l-4.24414,4.24219c-0.26124,0.25082 -0.36648,0.62327 -0.27512,0.97371c0.09136,0.35044 0.36503,0.62411 0.71547,0.71547c0.35044,0.09136 0.72289,-0.01388 0.97371,-0.27512l4.24414,-4.24219c0.29576,-0.28749 0.38469,-0.72707 0.22393,-1.10691c-0.16075,-0.37985 -0.53821,-0.62204 -0.9505,-0.60988zM34.88867,33.89063c-0.40692,0.00011 -0.77321,0.24676 -0.92633,0.62377c-0.15312,0.37701 -0.06255,0.80922 0.22907,1.09303l4.24414,4.24219c0.25082,0.26124 0.62327,0.36648 0.97371,0.27512c0.35044,-0.09136 0.62411,-0.36503 0.71547,-0.71547c0.09136,-0.35044 -0.01388,-0.72289 -0.27512,-0.97371l-4.24414,-4.24219c-0.18827,-0.19353 -0.4468,-0.30272 -0.7168,-0.30273zM24.98438,37.98633c-0.55152,0.00862 -0.99193,0.46214 -0.98437,1.01367v6c-0.0051,0.36064 0.18438,0.69608 0.49587,0.87789c0.3115,0.18181 0.69676,0.18181 1.00825,0c0.3115,-0.18181 0.50097,-0.51725 0.49587,-0.87789v-6c0.0037,-0.2703 -0.10218,-0.53059 -0.29351,-0.72155c-0.19133,-0.19097 -0.45182,-0.29634 -0.72212,-0.29212z"></path></g></g>
+        </svg>
+        <svg class="dark-mode-btn moon" onclick="toggleDarkMode()" height="50" width="50" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg"><path fill="#000000" d="M384 512a448 448 0 0 1 215.872-383.296A384 384 0 0 0 213.76 640h188.8A448.256 448.256 0 0 1 384 512zM171.136 704a448 448 0 0 1 636.992-575.296A384 384 0 0 0 499.328 704h-328.32z"/><path fill="#000000" d="M32 640h960q32 0 32 32t-32 32H32q-32 0-32-32t32-32zm128 128h384a32 32 0 1 1 0 64H160a32 32 0 1 1 0-64zm160 127.68 224 .256a32 32 0 0 1 32 32V928a32 32 0 0 1-32 32l-224-.384a32 32 0 0 1-32-32v-.064a32 32 0 0 1 32-32z"/></svg>
+    </div>
+<div class="endpoint">
+    <h2>Root</h2>
+    <p><strong>GET /</strong></p>
+    <p>Returns a list of supported languages.</p>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "supportedLanguages": ["string"]
+}</pre>
+</div>
+
+<div class="endpoint">
+    <h2>Login</h2>
+    <p><strong>POST /login</strong></p>
+    <p>Authenticates a user and returns a JWT token.</p>
+    <h3>Request Body:</h3>
+    <pre>{
+  "username": "string",
+  "password": "string"
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "token": "string"
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "errorMessage": "string"
+}</pre>
+</div>
+
+<div class="endpoint">
+    <h2>Register</h2>
+    <p><strong>POST /register</strong></p>
+    <p>Registers a new user in the database.</p>
+    <h3>Request Body:</h3>
+    <pre>{
+  "username": "string",
+  "password": "string"
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "token": "string"
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "errorMessage": "string"
+}</pre>
+</div>
+
+<div class="endpoint">
+    <h2>Compile</h2>
+    <p><strong>POST /compile</strong> (Requires Authorization)</p>
+    <p>Compiles code inside a Docker container.</p>
+    <h3>Request Body:</h3>
+    <pre>{
+  "language": "string",
+  "codeToRun": "string"
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "output": "string"
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+  "dateTime": "string",
+  "statusCode": number,
+  "errorMessage": "string"
+}</pre>
+</div>
+
+    <script>
+        function toggleDarkMode() {
+            if (document.body.classList.contains("dark-mode")) {
+                document.querySelector(".moon").style.display = "flex";
+                document.querySelector(".sun").style.display = "none";
+            } else {
+                document.querySelector(".moon").style.display = "none";
+                document.querySelector(".sun").style.display = "flex";
+            }
+
+            document.body.classList.toggle('dark-mode');
+        }
+    </script>
+</body>
+</html>

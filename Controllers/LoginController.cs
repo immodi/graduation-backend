@@ -4,9 +4,9 @@ using backend.Services;
 
 namespace backend.Controllers;
 
-public class RegisterController(JwtService jwtService, DatabaseService databaseService, AuthRequest authRequest)
+internal class LoginController(JwtService jwtService, DatabaseService databaseService, AuthRequest authRequest)
 {
-    public async Task<BaseResponse> RegisterUser()
+    public async Task<BaseResponse> LoginUser()
     {
         if (string.IsNullOrEmpty(authRequest.Username))
         {
@@ -17,12 +17,11 @@ public class RegisterController(JwtService jwtService, DatabaseService databaseS
         {
             return new ErrorResponse("Password is required");
         }
-
-
-        var isRegistered = await databaseService.SignUpAsync(authRequest);
-        if (!isRegistered)
+        
+        var isLoggedIn = await databaseService.SignInAsync(authRequest);
+        if (!isLoggedIn)
         {
-            return new ErrorResponse("Couldn't register user"){ StatusCode = 500 };
+            return new ErrorResponse("Either Username or Password are wrong");
         }
         
         var token = jwtService.GenerateToken(authRequest.Username);

@@ -23,9 +23,6 @@ public static class HandleAuthenticationClass
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!))
                 };
                 
-                Console.WriteLine(jwtIssuer);
-                Console.WriteLine(jwtKey);
-
                 options.Events = new JwtBearerEvents
                 {
                     OnChallenge = async context =>

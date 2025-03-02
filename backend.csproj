@@ -19,10 +19,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Models\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <_ContentIncludedByDefault Remove="publish\appsettings.Development.json" />
       <_ContentIncludedByDefault Remove="publish\appsettings.json" />
       <_ContentIncludedByDefault Remove="publish\backend.staticwebassets.endpoints.json" />

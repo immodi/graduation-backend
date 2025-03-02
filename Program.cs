@@ -12,7 +12,6 @@ builder.Services.AddAuthorizationBuilder();
 builder.Services.AddAuthorization();
 builder.Services.AddCustomSingeltons();
 
-
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -21,10 +20,10 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
-
 
 app.RegisterEndpoints();
 app.Run();
