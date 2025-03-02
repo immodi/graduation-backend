@@ -18,6 +18,8 @@
         .dark-mode-btn { border: none; cursor: pointer; }
         .moon {display: none;}
         .sun {display: flex;}
+        .auth-note { background: #222; padding: 10px; border-left: 4px solid #ffcc00; margin: 20px 0; }
+        
     </style>
 </head>
 <body class="dark-mode">
@@ -90,6 +92,11 @@
     <h2>Compile</h2>
     <p><strong>POST /compile</strong> (Requires Authorization)</p>
     <p>Compiles code inside a Docker container.</p>
+    <div class="auth-note dark-mode">
+        <strong>Authorization Note:</strong>
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
     <h3>Request Body:</h3>
     <pre>{
   "language": "string",
