@@ -1,27 +1,38 @@
+using System.Text.RegularExpressions;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
 using backend.Services;
 
 namespace backend.Controllers;
 
-internal class LoginController(JwtService jwtService, DatabaseService databaseService, AuthRequest authRequest)
+internal class LoginController(JwtService jwtService, DatabaseService databaseService, AuthRequest? authRequest)
 {
     public async Task<BaseResponse> LoginUser()
     {
+        if (authRequest == null)
+        {
+            return new ErrorResponse("Invalid request");
+        }
+        
         if (string.IsNullOrEmpty(authRequest.Username))
         {
             return new ErrorResponse("Username is required");
         }
-
+        
+        if (!Regex.IsMatch(authRequest.Username, @"^\w+$"))
+        {
+            return new ErrorResponse("Username can only contain letters, digits, and underscores, and must not have spaces");
+        }
+        
         if (string.IsNullOrEmpty(authRequest.Password))
         {
             return new ErrorResponse("Password is required");
         }
         
-        var isLoggedIn = await databaseService.SignInAsync(authRequest);
-        if (!isLoggedIn)
+        var databaseOutput = await databaseService.SignInAsync(authRequest);
+        if (!databaseOutput.IsSuccess)
         {
-            return new ErrorResponse("Either Username or Password are wrong");
+            return databaseOutput.Response;
         }
         
         var token = jwtService.GenerateToken(authRequest.Username);

@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using backend.DTOs.Requests;
+using backend.DTOs.Responses;
 using backend.Models;
 
 namespace backend.Services;
@@ -23,7 +24,7 @@ public class DatabaseService
         await _database.CreateTableAsync<User>();
     }
 
-    public async Task<bool> SignUpAsync(AuthRequest request)
+    public async Task<DatabaseOutput> SignUpAsync(AuthRequest request)
     {
         // Check if the username already exists
         var existingUser = await _database.Table<User>()
@@ -32,8 +33,7 @@ public class DatabaseService
 
         if (existingUser != null)
         {
-            // Username already taken
-            return false;
+            return new DatabaseOutput(false, new ErrorResponse("Username already exists"));
         }
 
         // Hash the password (implement a proper hashing mechanism)
@@ -48,10 +48,10 @@ public class DatabaseService
 
         // Insert the new user into the database
         await _database.InsertAsync(newUser);
-        return true;
+        return new DatabaseOutput(true, new AuthResponse(newUser.Username));
     }
 
-    public async Task<bool> SignInAsync(AuthRequest request)
+    public async Task<DatabaseOutput> SignInAsync(AuthRequest request)
     {
         // Retrieve the user by username
         var user = await _database.Table<User>()
@@ -61,13 +61,17 @@ public class DatabaseService
         if (user == null)
         {
             // User not found
-            return false;
+            return new DatabaseOutput(false, new ErrorResponse("Username not found"));
         }
 
         // Hash the input password and compare with the stored hash
         var passwordHash = HashPassword(request.Password);
+        if (user.PasswordHash != passwordHash)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("Invalid password"));
+        }
         
-        return user.PasswordHash == passwordHash;
+        return new DatabaseOutput(true, new AuthResponse(user.Username));
     }
     private static string HashPassword(string password)
     {
