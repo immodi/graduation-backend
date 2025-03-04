@@ -28,11 +28,20 @@ public static class WebApplicationExtension
         });       
         
         app.MapPost("/login", async (JwtService jwtService, DatabaseService databaseService, [FromBody] AuthRequest registerRequest) =>
-        (await new LoginController(jwtService, databaseService, registerRequest).LoginUser()).ToResult());
+        (await new AuthController(jwtService, databaseService, registerRequest).LoginUser()).ToResult());
         app.MapPost("/register", async (JwtService jwtService, DatabaseService databaseService, [FromBody] AuthRequest registerRequest) =>
-        (await new RegisterController(jwtService, databaseService, registerRequest).RegisterUser()).ToResult());
+        (await new AuthController(jwtService, databaseService, registerRequest).RegisterUser()).ToResult());
+        
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
         (await new CompileController(dockerClient, compileRequest).Compile()).ToResult()).RequireAuthorization();
+        
+        app.MapGet("/file", async (DatabaseService databaseService, [FromBody] FileReadRequest fileReadRequest) =>
+        (await new FileController(databaseService, fileReadRequest).ReadFile()).ToResult()).RequireAuthorization();
+        app.MapPost("/file", async (DatabaseService databaseService, [FromBody] FileCreationRequest fileCreationRequest) =>
+        (await new FileController(databaseService, fileCreationRequest).CreateFile()).ToResult()).RequireAuthorization();
+        app.MapPatch("/file", async (DatabaseService databaseService, [FromBody] FileUpdateRequest fileUpdateRequest) =>
+        (await new FileController(databaseService, fileUpdateRequest).UpdateFile()).ToResult()).RequireAuthorization();
+
         
         app.MapFallback(() => new ErrorResponse("Endpoint or Method not found"){StatusCode = 404}.ToResult());
     }

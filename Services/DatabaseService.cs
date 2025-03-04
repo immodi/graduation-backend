@@ -3,6 +3,7 @@ using System.Text;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
 using backend.Models;
+using File = backend.Models.File;
 
 namespace backend.Services;
 
@@ -22,9 +23,10 @@ public class DatabaseService
     private async Task InitializeDatabase()
     {
         await _database.CreateTableAsync<User>();
+        await _database.CreateTableAsync<File>();
     }
 
-    public async Task<DatabaseOutput> SignUpAsync(AuthRequest request)
+    public async Task<DatabaseOutput> SignUpAsync(JwtService jwtService, AuthRequest request)
     {
         // Check if the username already exists
         var existingUser = await _database.Table<User>()
@@ -48,10 +50,10 @@ public class DatabaseService
 
         // Insert the new user into the database
         await _database.InsertAsync(newUser);
-        return new DatabaseOutput(true, new AuthResponse(newUser.Username));
+        return await SignInAsync(jwtService, request);
     }
 
-    public async Task<DatabaseOutput> SignInAsync(AuthRequest request)
+    public async Task<DatabaseOutput> SignInAsync(JwtService jwtService, AuthRequest request)
     {
         // Retrieve the user by username
         var user = await _database.Table<User>()
@@ -71,8 +73,79 @@ public class DatabaseService
             return new DatabaseOutput(false, new ErrorResponse("Invalid password"));
         }
         
-        return new DatabaseOutput(true, new AuthResponse(user.Username));
+        var token = jwtService.GenerateToken(user.Username);
+        return new DatabaseOutput(true, new AuthResponse(user.Id, token));
     }
+    
+    public async Task<DatabaseOutput> CreateFile(FileCreationRequest request)
+    {
+        // Retrieve the user by username
+        var user = await _database.Table<User>()
+            .Where(u => u.Id == request.UserId)
+            .FirstOrDefaultAsync();
+
+        if (user == null)
+        {
+            // User not found
+            return new DatabaseOutput(false, new ErrorResponse("User not found"));
+        }
+        
+        var newFile = new File
+        {
+            FileName = request.FileName,
+            UserId = user.Id,
+            Content = request.FileContent,
+        };
+
+        await _database.InsertAsync(newFile);
+        return new DatabaseOutput(true, new FileCreationResponse(newFile.Id, newFile.FileName, Encoding.UTF8.GetBytes(newFile.Content).Length));
+    }
+    
+    public async Task<DatabaseOutput> ReadFile(FileReadRequest request)
+    {
+        // Retrieve the user by username
+        var file = await _database.Table<File>()
+            .Where(f => f.Id == request.FileId)
+            .FirstOrDefaultAsync();
+
+        if (file == null)
+        {
+            // File not found
+            return new DatabaseOutput(false, new ErrorResponse("File not found"));
+        }
+        
+        return new DatabaseOutput(true, new FileReadResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
+    }
+    
+    public async Task<DatabaseOutput> UpdateFile(FileUpdateRequest request)
+    {
+        // Retrieve the file by its ID
+        var file = await _database.Table<File>()
+            .Where(f => f.Id == request.FileId)
+            .FirstOrDefaultAsync();
+
+        if (file == null)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("File not found"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.NewFileName))
+        {
+            file.FileName = request.NewFileName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.NewFileContent))
+        {
+            file.Content = request.NewFileContent;
+        }
+
+        file.LastModifiedDate = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss");
+
+        // Save changes to the database
+        await _database.UpdateAsync(file);
+        return new DatabaseOutput(true, new FileReadResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
+    }
+
     private static string HashPassword(string password)
     {
         using var sha256 = SHA256.Create();

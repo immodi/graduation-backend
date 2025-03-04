@@ -12,7 +12,7 @@ public class DockerService(DockerClient dockerClient, string language, string co
     {
         if (ProgrammingLanguages.Commands.TryGetValue(language, out var commandTemplate))
         {
-            var commandArray = commandTemplate.Command.Append(codeToRun).ToArray();
+            var commandArray = commandTemplate.Command(codeToRun);
 
             var containerConfig = new CreateContainerParameters
             {

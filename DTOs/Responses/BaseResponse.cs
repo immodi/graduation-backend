@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace backend.DTOs.Responses;
 
-public record BaseResponse(
+public abstract record BaseResponse(
     [property: JsonPropertyName("dateTime")] string DateTime,
     [property: JsonPropertyName("statusCode")] int StatusCode
 )

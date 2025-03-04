@@ -19,8 +19,26 @@
         .moon {display: none;}
         .sun {display: flex;}
         .auth-note { background: #222; padding: 10px; border-left: 4px solid #ffcc00; margin: 20px 0; }
-        
+        a[route] {font-size: 1.3rem}
     </style>
+    <script>
+        Object.defineProperty(HTMLElement.prototype, 'route', {
+            get() {
+                return this.getAttribute('route') || '';
+            },
+            set(value) {
+                this.textContent = `${window.location.origin}/${value}`
+                this.href = `${window.location.origin}/${value}`
+                this.setAttribute('route', value || '');
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('a[route]').forEach(span => {
+                span.route = span.getAttribute('route');
+            });
+        });
+    </script>
 </head>
 <body class="dark-mode">
     <div class="main-header">
@@ -32,7 +50,7 @@
     </div>
 <div class="endpoint">
     <h2>Root</h2>
-    <p><strong>GET /</strong></p>
+    <h3>GET ->  <a route=""></a></h3>
     <p>Returns a list of supported languages.</p>
     <h3>Response (200 OK):</h3>
     <pre>{
@@ -44,7 +62,7 @@
 
 <div class="endpoint">
     <h2>Login</h2>
-    <p><strong>POST /login</strong></p>
+    <h3>POST -> <a route="login"></a></h3>
     <p>Authenticates a user and returns a JWT token.</p>
     <h3>Request Body:</h3>
     <pre>{
@@ -67,7 +85,7 @@
 
 <div class="endpoint">
     <h2>Register</h2>
-    <p><strong>POST /register</strong></p>
+    <h3>POST -> <a route="register"></a></h3>
     <p>Registers a new user in the database.</p>
     <h3>Request Body:</h3>
     <pre>{
@@ -90,10 +108,10 @@
 
 <div class="endpoint">
     <h2>Compile</h2>
-    <p><strong>POST /compile</strong> (Requires Authorization)</p>
+    <h3>POST -> <a route="compile"></a> (Requires Authorization)</h3>
     <p>Compiles code inside a Docker container.</p>
     <div class="auth-note dark-mode">
-        <strong>Authorization Note:</strong>
+        Authorization Note:
         <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
         <pre>Authorization: Bearer {token}</pre>
     </div>
@@ -116,18 +134,89 @@
 }</pre>
 </div>
 
-    <script>
-        function toggleDarkMode() {
-            if (document.body.classList.contains("dark-mode")) {
-                document.querySelector(".moon").style.display = "flex";
-                document.querySelector(".sun").style.display = "none";
-            } else {
-                document.querySelector(".moon").style.display = "none";
-                document.querySelector(".sun").style.display = "flex";
-            }
+<div class="endpoint">
+    <h2>Read File</h2>
+    <h3>GET -> <a route="file"></a> (Requires Authorization)</h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "fileId": number
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "filename": "string",
+    "fileContent": "string",
+    "fileCreationDate": "string",
+    "lastModifiedDate": "string",
+    "fileSizeInBytes": number
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
 
-            document.body.classList.toggle('dark-mode');
+<div class="endpoint">
+    <h2>Create File</h2>
+    <h3>POST -> <a route="file"></a> (Requires Authorization)</h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "userId": number,
+    "fileName": "string",
+    "fileContent": "string"
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "fileId": number,
+    "fileName": "string",
+    "fileSizeInBytes": number
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
+<div class="endpoint">
+    <h2>Update File</h2>
+    <h3>PATCH -> <a route="file"></a> (Requires Authorization)</h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "fileId": number,
+    "newFileName": "string" | null ,
+    "newFileContent": "string" | null
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "fileId": number,
+    "fileName": "string",
+    "fileSizeInBytes": number
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
+
+<script>
+       function toggleDarkMode() {
+        if (document.body.classList.contains("dark-mode")) {
+            document.querySelector(".moon").style.display = "flex";
+            document.querySelector(".sun").style.display = "none";
+        } else {
+            document.querySelector(".moon").style.display = "none";
+            document.querySelector(".sun").style.display = "flex";
         }
-    </script>
+    
+        document.body.classList.toggle('dark-mode');
+    }
+    
+</script>
 </body>
 </html>

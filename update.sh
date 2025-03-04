@@ -17,6 +17,9 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
+echo "Getting a copy of the db..."
+cp ./app/db.db .
+
 echo "Removing existing './app' directory (if it exists) and creating a fresh one..."
 rm -rf ./app
 mkdir -p ./app
@@ -28,7 +31,10 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-# Optionally remove the downloaded tarball
+echo "Restoring the old db..."
+cp db.db ./app
+
+# Remove the downloaded tarball
 rm -f "${FILE}"
 
 echo "Deployment completed successfully."
