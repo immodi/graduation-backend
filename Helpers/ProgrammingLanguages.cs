@@ -8,30 +8,31 @@ public static class ProgrammingLanguages
     {
         { "python", new LanguageConfig("python:3-alpine3.21", s => ["python", "-c", s ]) },
         { "javascript", new LanguageConfig("node:22-alpine3.21", s => ["node", "-e", s ]) },
-        { 
+        {
             "csharp", new LanguageConfig(
-                "mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim", 
-                s => 
+                "mcr.microsoft.com/dotnet/sdk:8.0-bookworm-slim",
+                s =>
                 [
-                    "bash", "-c", 
-                    $"dotnet tool install -g dotnet-script > /dev/null 2>&1 && " +
+                    "bash", "-c",
+                    "dotnet tool install -g dotnet-script > /dev/null 2>&1 && " +
                     "export PATH=\"$PATH:/root/.dotnet/tools\" && " +
-                    $"echo \"{s}\" > script.csx && " +
+                    "cat <<EOF > script.csx\n" + s + "\nEOF\n" +
                     "dotnet-script script.csx"
                 ]
-            ) 
+            )
         },
-        { 
+        {
             "java", new LanguageConfig(
-                "openjdk:24-jdk-slim-bookworm", 
-                s => 
-                [ 
-                    "bash", "-c", 
-                    $"echo \"{s}\" > Main.java && " +
+                "openjdk:24-jdk-slim-bookworm",
+                s =>
+                [
+                    "bash", "-c",
+                    $"cat <<EOF > Main.java\n{s}\nEOF\n" +
                     "javac Main.java && java Main"
                 ]
-            ) 
-        },
+            )
+        }
+
 
     };
 }
