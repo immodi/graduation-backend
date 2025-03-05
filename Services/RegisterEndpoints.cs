@@ -35,12 +35,12 @@ public static class WebApplicationExtension
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
         (await new CompileController(dockerClient, compileRequest).Compile()).ToResult()).RequireAuthorization();
         
-        app.MapGet("/file", async (DatabaseService databaseService, [FromBody] FileReadRequest fileReadRequest) =>
-        (await new FileController(databaseService, fileReadRequest).ReadFile()).ToResult()).RequireAuthorization();
-        app.MapPost("/file", async (DatabaseService databaseService, [FromBody] FileCreationRequest fileCreationRequest) =>
-        (await new FileController(databaseService, fileCreationRequest).CreateFile()).ToResult()).RequireAuthorization();
-        app.MapPatch("/file", async (DatabaseService databaseService, [FromBody] FileUpdateRequest fileUpdateRequest) =>
-        (await new FileController(databaseService, fileUpdateRequest).UpdateFile()).ToResult()).RequireAuthorization();
+        app.MapGet("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileReadRequest fileReadRequest) =>
+        (await new FileController(httpContext, jwtService, databaseService, fileReadRequest).ReadFile()).ToResult()).RequireAuthorization();
+        app.MapPost("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileCreationRequest fileCreationRequest) =>
+        (await new FileController(httpContext, jwtService, databaseService, fileCreationRequest).CreateFile()).ToResult()).RequireAuthorization();
+        app.MapPatch("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileUpdateRequest fileUpdateRequest) =>
+        (await new FileController(httpContext, jwtService, databaseService, fileUpdateRequest).UpdateFile()).ToResult()).RequireAuthorization();
 
         
         app.MapFallback(() => new ErrorResponse("Endpoint or Method not found"){StatusCode = 404}.ToResult());

@@ -77,17 +77,52 @@ public class DatabaseService
         return new DatabaseOutput(true, new AuthResponse(user.Id, token));
     }
     
-    public async Task<DatabaseOutput> CreateFile(FileCreationRequest request)
+    public async Task<DatabaseOutput> ReadFile(string userToken, JwtService jwtService, FileReadRequest request)
+    {
+        // Retrieve the user by username
+        var file = await _database.Table<File>()
+            .Where(f => f.Id == request.FileId)
+            .FirstOrDefaultAsync();
+        
+        if (file == null)
+        {
+            // File not found
+            return new DatabaseOutput(false, new ErrorResponse("File not found"));
+        }
+        
+        var user = await _database.Table<User>()
+            .Where(u => u.Id == file.UserId)
+            .FirstOrDefaultAsync();
+        
+        
+        var isTokenValidForUser = jwtService.IsTokenValidForUser(userToken, user.Username);
+
+        if (!isTokenValidForUser)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("The resource isn't yours"){StatusCode = 403});
+        }
+        
+        return new DatabaseOutput(true, new FileReadResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
+    }
+    
+    public async Task<DatabaseOutput> CreateFile(string userToken, JwtService jwtService, FileCreationRequest request)
     {
         // Retrieve the user by username
         var user = await _database.Table<User>()
             .Where(u => u.Id == request.UserId)
             .FirstOrDefaultAsync();
-
+        
         if (user == null)
         {
             // User not found
             return new DatabaseOutput(false, new ErrorResponse("User not found"));
+        }
+        
+        var isTokenValidForUser = jwtService.IsTokenValidForUser(userToken, user.Username);
+
+        if (!isTokenValidForUser)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("Current user ID doesn't match supplied 'userId'"){StatusCode = 403});
         }
         
         var newFile = new File
@@ -101,23 +136,7 @@ public class DatabaseService
         return new DatabaseOutput(true, new FileCreationResponse(newFile.Id, newFile.FileName, Encoding.UTF8.GetBytes(newFile.Content).Length));
     }
     
-    public async Task<DatabaseOutput> ReadFile(FileReadRequest request)
-    {
-        // Retrieve the user by username
-        var file = await _database.Table<File>()
-            .Where(f => f.Id == request.FileId)
-            .FirstOrDefaultAsync();
-
-        if (file == null)
-        {
-            // File not found
-            return new DatabaseOutput(false, new ErrorResponse("File not found"));
-        }
-        
-        return new DatabaseOutput(true, new FileReadResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
-    }
-    
-    public async Task<DatabaseOutput> UpdateFile(FileUpdateRequest request)
+    public async Task<DatabaseOutput> UpdateFile(string userToken, JwtService jwtService, FileUpdateRequest request)
     {
         // Retrieve the file by its ID
         var file = await _database.Table<File>()
@@ -137,6 +156,18 @@ public class DatabaseService
         if (!string.IsNullOrWhiteSpace(request.NewFileContent))
         {
             file.Content = request.NewFileContent;
+        }
+        
+        var user = await _database.Table<User>()
+            .Where(u => u.Id == file.UserId)
+            .FirstOrDefaultAsync();
+        
+        
+        var isTokenValidForUser = jwtService.IsTokenValidForUser(userToken, user.Username);
+
+        if (!isTokenValidForUser)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("The resource isn't yours"){StatusCode = 403});
         }
 
         file.LastModifiedDate = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss");

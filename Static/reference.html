@@ -147,7 +147,9 @@
     "fileContent": "string",
     "fileCreationDate": "string",
     "lastModifiedDate": "string",
-    "fileSizeInBytes": number
+    "fileSizeInBytes": number,
+    "dateTime": "string",
+    "statusCode": number,
 }</pre>
     <h3>Response (400/500 Error):</h3>
     <pre>{
@@ -170,7 +172,9 @@
     <pre>{
     "fileId": number,
     "fileName": "string",
-    "fileSizeInBytes": number
+    "fileSizeInBytes": number,
+    "dateTime": "string",
+    "statusCode": number,
 }</pre>
     <h3>Response (400/500 Error):</h3>
     <pre>{
@@ -191,9 +195,13 @@
 }</pre>
     <h3>Response (200 OK):</h3>
     <pre>{
-    "fileId": number,
-    "fileName": "string",
+    "filename": "string",
+    "fileContent": "string",
+    "fileCreationDate": "string",
+    "lastModifiedDate": "string",
     "fileSizeInBytes": number
+    "dateTime": "string",
+    "statusCode": number,
 }</pre>
     <h3>Response (400/500 Error):</h3>
     <pre>{

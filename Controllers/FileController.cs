@@ -5,8 +5,10 @@ using backend.Services;
 
 namespace backend.Controllers;
 
-public class FileController(DatabaseService databaseService, BaseRequest? request)
+public class FileController(HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, BaseRequest? request)
 {
+    private readonly string _userToken = httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim();
+       
     public async Task<BaseResponse> CreateFile()
     {
         if (request == null)
@@ -25,7 +27,7 @@ public class FileController(DatabaseService databaseService, BaseRequest? reques
             return new ErrorResponse("Invalid file name");
         }
 
-        var databaseOutput = await databaseService.CreateFile(creationRequest);
+        var databaseOutput = await databaseService.CreateFile(_userToken, jwtService, creationRequest);
         return databaseOutput.Response;
     }
     
@@ -42,7 +44,7 @@ public class FileController(DatabaseService databaseService, BaseRequest? reques
             return new ErrorResponse("Invalid file ID");
         }
 
-        var databaseOutput = await databaseService.UpdateFile(updateRequest);
+        var databaseOutput = await databaseService.UpdateFile(_userToken, jwtService, updateRequest);
         return databaseOutput.Response;
     }
     
@@ -60,7 +62,7 @@ public class FileController(DatabaseService databaseService, BaseRequest? reques
             return new ErrorResponse("Invalid file ID");
         }
         
-        var databaseOutput = await databaseService.ReadFile(readRequest);
+        var databaseOutput = await databaseService.ReadFile(_userToken, jwtService, readRequest);
         return databaseOutput.Response;
     }
 }
