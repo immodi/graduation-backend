@@ -137,6 +137,11 @@
 <div class="endpoint">
     <h2>Read File</h2>
     <h3>GET -> <a route="file"></a> (Requires Authorization)</h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
     <h3>Request Body:</h3>
     <pre>{
     "fileId": number
@@ -162,6 +167,11 @@
 <div class="endpoint">
     <h2>Create File</h2>
     <h3>POST -> <a route="file"></a> (Requires Authorization)</h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
     <h3>Request Body:</h3>
     <pre>{
     "userId": number,
@@ -187,6 +197,11 @@
 <div class="endpoint">
     <h2>Update File</h2>
     <h3>PATCH -> <a route="file"></a> (Requires Authorization)</h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
     <h3>Request Body:</h3>
     <pre>{
     "fileId": number,
