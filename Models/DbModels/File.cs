@@ -20,5 +20,6 @@ public class File
     public int UserId { get; set; }
     
     public string FileName { get; set; }
-    
+
+    public string SharingCode { get; set; }
 }

@@ -2,7 +2,9 @@ using System.Security.Cryptography;
 using System.Text;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
+using backend.Helpers;
 using backend.Models;
+using backend.Models.HelperModels;
 using File = backend.Models.File;
 
 namespace backend.Services;
@@ -39,7 +41,7 @@ public class DatabaseService
         }
 
         // Hash the password (implement a proper hashing mechanism)
-        var passwordHash = HashPassword(request.Password);
+        var passwordHash = PasswordHasher.HashPassword(request.Password);
 
         // Create a new user
         var newUser = new User
@@ -67,7 +69,7 @@ public class DatabaseService
         }
 
         // Hash the input password and compare with the stored hash
-        var passwordHash = HashPassword(request.Password);
+        var passwordHash = PasswordHasher.HashPassword(request.Password);
         if (user.PasswordHash != passwordHash)
         {
             return new DatabaseOutput(false, new ErrorResponse("Invalid password"));
@@ -107,9 +109,11 @@ public class DatabaseService
     
     public async Task<DatabaseOutput> CreateFile(string userToken, JwtService jwtService, FileCreationRequest request)
     {
+        var tokenOwner = jwtService.GetUsernameFromToken(userToken);
+        
         // Retrieve the user by username
         var user = await _database.Table<User>()
-            .Where(u => u.Id == request.UserId)
+            .Where(u => u.Username == tokenOwner)
             .FirstOrDefaultAsync();
         
         if (user == null)
@@ -117,14 +121,7 @@ public class DatabaseService
             // User not found
             return new DatabaseOutput(false, new ErrorResponse("User not found"));
         }
-        
-        var isTokenValidForUser = jwtService.IsTokenValidForUser(userToken, user.Username);
-
-        if (!isTokenValidForUser)
-        {
-            return new DatabaseOutput(false, new ErrorResponse("Current user ID doesn't match supplied 'userId'"){StatusCode = 403});
-        }
-        
+      
         var newFile = new File
         {
             FileName = request.FileName,
@@ -174,21 +171,80 @@ public class DatabaseService
 
         // Save changes to the database
         await _database.UpdateAsync(file);
-        return new DatabaseOutput(true, new FileReadResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
+        return new DatabaseOutput(true, new FileUpdateResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
     }
 
-    private static string HashPassword(string password)
+    public async Task<DatabaseOutput> DeleteFile(string userToken, JwtService jwtService, FileDeleteRequest request)
     {
-        using var sha256 = SHA256.Create();
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(password));
-        var builder = new StringBuilder();
-        foreach (var b in bytes)
-        {
-            builder.Append(b.ToString("x2"));
-        }
-        return builder.ToString();
+        // Retrieve the user by username
+        var file = await _database.Table<File>()
+            .Where(f => f.Id == request.FileId)
+            .FirstOrDefaultAsync();
         
+        if (file == null)
+        {
+            // File not found
+            return new DatabaseOutput(false, new ErrorResponse("File not found"));
+        }
+        
+        var user = await _database.Table<User>()
+            .Where(u => u.Id == file.UserId)
+            .FirstOrDefaultAsync();
+        
+        var isTokenValidForUser = jwtService.IsTokenValidForUser(userToken, user.Username);
+
+        if (!isTokenValidForUser)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("The resource isn't yours"){StatusCode = 403});
+        }
+        
+        await _database.DeleteAsync(file);
+        return new DatabaseOutput(true, new FileDeleteResponse(true));
     }
 
     
+    public async Task<DatabaseOutput> ShareFile(string originUrl, string userToken, JwtService jwtService, FileShareRequest request)
+    {
+        // Retrieve the file by its ID
+        var file = await _database.Table<File>()
+            .Where(f => f.Id == request.FileId)
+            .FirstOrDefaultAsync();
+        
+        if (file == null)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("File not found"));
+        }
+        
+        var user = await _database.Table<User>()
+            .Where(u => u.Id == file.UserId)
+            .FirstOrDefaultAsync();
+        
+        var isTokenValidForUser = jwtService.IsTokenValidForUser(userToken, user.Username);
+        
+        if (!isTokenValidForUser)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("The resource isn't yours"){StatusCode = 403});
+        }
+        
+        file.SharingCode = RandomStringGenerator.GenerateRandomString();
+        await _database.UpdateAsync(file);
+        
+        return new DatabaseOutput(true, new FileShareResponse($"{originUrl}/share/{file.SharingCode}"));
+    }
+
+    public async Task<DatabaseOutput> ReadSharedFile(FileShareReadRequest request)
+    {
+        var fileShareCode = request.FileShareLink.TrimEnd('/').Split('/').Last();
+        // Retrieve the file by its ID
+        var file = await _database.Table<File>()
+            .Where(f => f.SharingCode == fileShareCode)
+            .FirstOrDefaultAsync();
+        
+        if (file == null)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("File not found, or share link was previously overriden"));
+        }
+        
+        return new DatabaseOutput(true, new FileShareReadResponse(file.FileName, file.Content, Encoding.UTF8.GetBytes(file.Content).Length));
+    }
 }

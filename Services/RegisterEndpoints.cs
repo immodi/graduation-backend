@@ -27,21 +27,28 @@ public static class WebApplicationExtension
             await stream.CopyToAsync(context.Response.Body);
         });       
         
-        app.MapPost("/login", async (JwtService jwtService, DatabaseService databaseService, [FromBody] AuthRequest registerRequest) =>
-        (await new AuthController(jwtService, databaseService, registerRequest).LoginUser()).ToResult());
+        app.MapPost("/login", async (JwtService jwtService, DatabaseService databaseService, [FromBody] AuthRequest loginRequest) =>
+        (await new AuthController(jwtService, databaseService).LoginUser(loginRequest)).ToResult());
         app.MapPost("/register", async (JwtService jwtService, DatabaseService databaseService, [FromBody] AuthRequest registerRequest) =>
-        (await new AuthController(jwtService, databaseService, registerRequest).RegisterUser()).ToResult());
+        (await new AuthController(jwtService, databaseService).RegisterUser(registerRequest)).ToResult());
         
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
-        (await new CompileController(dockerClient, compileRequest).Compile()).ToResult()).RequireAuthorization();
+        (await new CompileController(dockerClient).Compile(compileRequest)).ToResult()).RequireAuthorization();
         
         app.MapGet("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileReadRequest fileReadRequest) =>
-        (await new FileController(httpContext, jwtService, databaseService, fileReadRequest).ReadFile()).ToResult()).RequireAuthorization();
+        (await new FileController(httpContext, jwtService, databaseService).ReadFile(fileReadRequest)).ToResult()).RequireAuthorization();
         app.MapPost("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileCreationRequest fileCreationRequest) =>
-        (await new FileController(httpContext, jwtService, databaseService, fileCreationRequest).CreateFile()).ToResult()).RequireAuthorization();
+        (await new FileController(httpContext, jwtService, databaseService).CreateFile(fileCreationRequest)).ToResult()).RequireAuthorization();
         app.MapPatch("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileUpdateRequest fileUpdateRequest) =>
-        (await new FileController(httpContext, jwtService, databaseService, fileUpdateRequest).UpdateFile()).ToResult()).RequireAuthorization();
+        (await new FileController(httpContext, jwtService, databaseService).UpdateFile(fileUpdateRequest)).ToResult()).RequireAuthorization();
+        app.MapDelete("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileDeleteRequest fileDeleteRequest) =>
+        (await new FileController(httpContext, jwtService, databaseService).DeleteFile(fileDeleteRequest)).ToResult()).RequireAuthorization();
 
+        
+        app.MapPost("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareRequest fileShareRequest) =>
+        (await new ShareController(httpContext, jwtService, databaseService).ShareFile( userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim(), request: fileShareRequest) ).ToResult()).RequireAuthorization();
+        app.MapGet("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareReadRequest fileShareReadRequest) =>
+        (await new ShareController(httpContext, jwtService, databaseService).ReadSharedFile(fileShareReadRequest)).ToResult());
         
         app.MapFallback(() => new ErrorResponse("Endpoint or Method not found"){StatusCode = 404}.ToResult());
     }

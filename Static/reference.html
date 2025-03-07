@@ -148,7 +148,7 @@
 }</pre>
     <h3>Response (200 OK):</h3>
     <pre>{
-    "filename": "string",
+    "fileName": "string",
     "fileContent": "string",
     "fileCreationDate": "string",
     "lastModifiedDate": "string",
@@ -174,7 +174,6 @@
     </div>
     <h3>Request Body:</h3>
     <pre>{
-    "userId": number,
     "fileName": "string",
     "fileContent": "string"
 }</pre>
@@ -210,7 +209,7 @@
 }</pre>
     <h3>Response (200 OK):</h3>
     <pre>{
-    "filename": "string",
+    "fileName": "string",
     "fileContent": "string",
     "fileCreationDate": "string",
     "lastModifiedDate": "string",
@@ -225,9 +224,83 @@
     "errorMessage": "string"
 }</pre>
 </div>
+    
+<div class="endpoint">
+    <h2>Delete File</h2>
+    <h3>DELETE -> <a route="file"></a> (Requires Authorization)</h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
+    <h3>Request Body:</h3>
+    <pre>{
+    "fileId": number,
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "isDeleted": boolean,
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
 
+<div class="endpoint">
+    <h2>Share File</h2>
+    <h3>POST -> <a route="share"></a> (Requires Authorization)</h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
+    <h3>Request Body:</h3>
+    <pre>{
+    "fileId": number,
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "fileShareUrl": "string",
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
 
-<script>
+<div class="endpoint">
+    <h2>Read Shared File</h2>
+    <h3>GET -> <a route="share"></a></h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "fileShareUrl": "string",
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "fileName": "string",
+    "fileContent": "string",
+    "fileSizeInBytes": number,
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
+    <script>
        function toggleDarkMode() {
         if (document.body.classList.contains("dark-mode")) {
             document.querySelector(".moon").style.display = "flex";

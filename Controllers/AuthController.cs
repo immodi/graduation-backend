@@ -5,58 +5,76 @@ using backend.Services;
 
 namespace backend.Controllers;
 
-internal class AuthController(JwtService jwtService, DatabaseService databaseService, AuthRequest? authRequest)
+internal class AuthController(JwtService jwtService, DatabaseService databaseService)
 {
-    public async Task<BaseResponse> LoginUser()
+    public async Task<BaseResponse> LoginUser(AuthRequest? request)
     {
-        if (authRequest == null)
+        if (request is null)
         {
             return new ErrorResponse("Invalid request");
         }
         
-        if (string.IsNullOrEmpty(authRequest.Username))
+        try
         {
-            return new ErrorResponse("Username is required");
+            if (string.IsNullOrEmpty(request.Username))
+            {
+                return new ErrorResponse("Username is required");
+            }
+
+            if (!Regex.IsMatch(request.Username, @"^\w+$"))
+            {
+                return new ErrorResponse(
+                    "Username can only contain letters, digits, and underscores, and must not have spaces");
+            }
+
+            if (string.IsNullOrEmpty(request.Password))
+            {
+                return new ErrorResponse("Password is required");
+            }
+
+            var databaseOutput = await databaseService.SignInAsync(jwtService, request);
+            return databaseOutput.Response;
         }
-        
-        if (!Regex.IsMatch(authRequest.Username, @"^\w+$"))
+        catch (Exception e)
         {
-            return new ErrorResponse("Username can only contain letters, digits, and underscores, and must not have spaces");
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
         }
-        
-        if (string.IsNullOrEmpty(authRequest.Password))
-        {
-            return new ErrorResponse("Password is required");
-        }
-        
-        var databaseOutput = await databaseService.SignInAsync(jwtService, authRequest);
-        return databaseOutput.Response;
         
     }
     
-    public async Task<BaseResponse> RegisterUser()
+    public async Task<BaseResponse> RegisterUser(AuthRequest? request)
     {
-        if (authRequest == null)
+        if (request is null)
         {
             return new ErrorResponse("Invalid request");
         }
         
-        if (string.IsNullOrEmpty(authRequest.Username))
+        try
         {
-            return new ErrorResponse("Username is required");
-        }
-        
-        if (!Regex.IsMatch(authRequest.Username, @"^\w+$"))
-        {
-            return new ErrorResponse("Username can only contain letters, digits, and underscores, and must not have spaces");
-        }
-        
-        if (string.IsNullOrEmpty(authRequest.Password))
-        {
-            return new ErrorResponse("Password is required");
-        }
+            if (string.IsNullOrEmpty(request.Username))
+            {
+                return new ErrorResponse("Username is required");
+            }
 
-        var databaseOutput = await databaseService.SignUpAsync(jwtService, authRequest);
-        return databaseOutput.Response;
+            if (!Regex.IsMatch(request.Username, @"^\w+$"))
+            {
+                return new ErrorResponse(
+                    "Username can only contain letters, digits, and underscores, and must not have spaces");
+            }
+
+            if (string.IsNullOrEmpty(request.Password))
+            {
+                return new ErrorResponse("Password is required");
+            }
+
+            var databaseOutput = await databaseService.SignUpAsync(jwtService, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
     }
 }

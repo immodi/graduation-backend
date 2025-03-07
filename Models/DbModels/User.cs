@@ -12,4 +12,5 @@ public class User
 
     [NotNull]
     public string PasswordHash { get; set; }
+    
 }

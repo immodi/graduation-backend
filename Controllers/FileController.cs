@@ -5,64 +5,108 @@ using backend.Services;
 
 namespace backend.Controllers;
 
-public class FileController(HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, BaseRequest? request)
+public class FileController(HttpContext httpContext, JwtService jwtService, DatabaseService databaseService)
 {
     private readonly string _userToken = httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim();
        
-    public async Task<BaseResponse> CreateFile()
+    public async Task<BaseResponse> ReadFile(FileReadRequest? request)
     {
-        if (request == null)
+        if (request is null)
         {
             return new ErrorResponse("Invalid request");
         }
-        var creationRequest = (request as FileCreationRequest)!;
-
-        if (string.IsNullOrEmpty(creationRequest.FileContent))
-        {
-            return new ErrorResponse("Invalid file content");
-        }
         
-        if (string.IsNullOrEmpty(creationRequest.FileName))
+        try
         {
-            return new ErrorResponse("Invalid file name");
-        }
+            if (request.FileId < 1)
+            {
+                return new ErrorResponse("Invalid file ID");
+            }
 
-        var databaseOutput = await databaseService.CreateFile(_userToken, jwtService, creationRequest);
-        return databaseOutput.Response;
+            var databaseOutput = await databaseService.ReadFile(_userToken, jwtService, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
     }
     
-    public async Task<BaseResponse> UpdateFile()
+    public async Task<BaseResponse> CreateFile(FileCreationRequest? request)
     {
-        if (request == null)
+        if (request is null)
         {
             return new ErrorResponse("Invalid request");
         }
-        var updateRequest = (request as FileUpdateRequest)!;
-
-        if (updateRequest.FileId < 1)
+        
+        try
         {
-            return new ErrorResponse("Invalid file ID");
-        }
+            if (string.IsNullOrEmpty(request.FileContent))
+            {
+                return new ErrorResponse("Invalid file content");
+            }
+        
+            if (string.IsNullOrEmpty(request.FileName))
+            {
+                return new ErrorResponse("Invalid file name");
+            }
 
-        var databaseOutput = await databaseService.UpdateFile(_userToken, jwtService, updateRequest);
-        return databaseOutput.Response;
+            var databaseOutput = await databaseService.CreateFile(_userToken, jwtService, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
     }
     
-    public async Task<BaseResponse> ReadFile()
+    public async Task<BaseResponse> UpdateFile(FileUpdateRequest? request)
     {
-        if (request == null)
+        if (request is null)
         {
             return new ErrorResponse("Invalid request");
         }
         
-        var readRequest = (request as FileReadRequest)!;
-
-        if (readRequest.FileId < 1)
+        try
         {
-            return new ErrorResponse("Invalid file ID");
+            if (request.FileId < 1)
+            {
+                return new ErrorResponse("Invalid file ID");
+            }
+
+            var databaseOutput = await databaseService.UpdateFile(_userToken, jwtService, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
+    }
+    
+    public async Task<BaseResponse> DeleteFile(FileDeleteRequest? request)
+    {
+        if (request is null)
+        {
+            return new ErrorResponse("Invalid request");
         }
         
-        var databaseOutput = await databaseService.ReadFile(_userToken, jwtService, readRequest);
-        return databaseOutput.Response;
+        try
+        {
+            if (request.FileId < 1)
+            {
+                return new ErrorResponse("Invalid file Id");
+            }
+
+            var databaseOutput = await databaseService.DeleteFile(_userToken, jwtService, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
     }
 }

@@ -80,4 +80,43 @@ public class JwtService(IConfiguration config)
             return false;
         }
     }
+    
+    public string GetUsernameFromToken(string token)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(config["Jwt:Key"]!));
+
+        var tokenHandler = new JwtSecurityTokenHandler();
+        try
+        {
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = false,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
+                ValidIssuer = config["Jwt:Issuer"],
+                IssuerSigningKey = key,
+                ClockSkew = TimeSpan.FromMinutes(5)
+            };
+
+            var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+
+            if (validatedToken is not JwtSecurityToken jwtToken)
+            {
+                return "";
+            }
+
+            var usernameClaims = principal.Claims
+                .Where(c => c.Type == ClaimTypes.Name || 
+                            c.Type == JwtRegisteredClaimNames.Sub || 
+                            c.Type == "username")
+                .ToList();
+            
+            return usernameClaims.FirstOrDefault()?.Value ?? "";
+        }
+        catch
+        {
+            return "";
+        }
+    }
 }

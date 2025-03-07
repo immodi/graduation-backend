@@ -5,11 +5,24 @@ using Docker.DotNet;
 
 namespace backend.Controllers;
 
-public class CompileController(DockerClient dockerClient, CompileRequest compileRequest)
+public class CompileController(DockerClient dockerClient)
 {
-    public async Task<BaseResponse> Compile()
+    public async Task<BaseResponse> Compile(CompileRequest? request)
     {
-        var output = await new DockerService(dockerClient, compileRequest.Language, compileRequest.CodeToRun).Run();
-        return output;
+        if (request is null)
+        {
+            return new ErrorResponse("Invalid request");
+        }
+        
+        try
+        {
+            var output = await new DockerService(dockerClient, request.Language, request.CodeToRun).Run();
+            return output;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
     }
 }

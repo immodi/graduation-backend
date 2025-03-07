@@ -1,6 +1,6 @@
 using backend.DTOs.Responses;
 
-namespace backend.Models;
+namespace backend.Models.HelperModels;
 
 public record DatabaseOutput
 (
