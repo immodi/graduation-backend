@@ -7,6 +7,8 @@ public record FileReadRequest(
     [property: JsonPropertyName("fileId")] int FileId
 ): BaseRequest;
 
+public record AllFilesRequest(): BaseRequest;
+
 
 public record FileCreationRequest(
     [property: JsonPropertyName("fileName")] string FileName,

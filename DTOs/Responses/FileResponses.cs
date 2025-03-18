@@ -15,6 +15,21 @@ public record FileReadResponse(
     int FileSizeInBytes
 ) : BaseResponse(200);
 
+public record SingleFileResponse(
+    [property: JsonPropertyName("fileId")]
+    int FileId,
+    
+    [property: JsonPropertyName("fileName")]
+    string FileName,
+    
+    [property: JsonPropertyName("fileSizeInBytes")]
+    int FileSizeInBytes
+);
+
+public record AllFilesResponse(
+    [property: JsonPropertyName("files")]
+    SingleFileResponse[] Files
+) : BaseResponse(200);
 
 public record FileCreationResponse(
     [property: JsonPropertyName("fileId")] int FileId,

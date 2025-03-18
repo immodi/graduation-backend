@@ -106,6 +106,26 @@ public class DatabaseService
         
         return new DatabaseOutput(true, new FileReadResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
     }
+
+    public async Task<DatabaseOutput> GetAllUserFiles(string userToken, JwtService jwtService)
+    {
+              var tokenOwner = jwtService.GetUsernameFromToken(userToken);
+              // Retrieve the user by username
+              var user = await _database.Table<User>()
+                  .Where(u => u.Username == tokenOwner)
+                  .FirstOrDefaultAsync();
+              
+              if (user == null)
+              {
+                  // User not found
+                  return new DatabaseOutput(false, new ErrorResponse("User not found"));
+              }
+
+              var files = await _database.Table<File>()
+                  .Where(f => f.UserId == user.Id).ToArrayAsync();
+
+              return new DatabaseOutput(true, new AllFilesResponse(files.Select(file => new SingleFileResponse(file.Id, file.FileName, Encoding.UTF8.GetBytes(file.Content).Length)).ToArray()));
+    }
     
     public async Task<DatabaseOutput> CreateFile(string userToken, JwtService jwtService, FileCreationRequest request)
     {

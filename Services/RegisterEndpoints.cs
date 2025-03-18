@@ -35,6 +35,8 @@ public static class WebApplicationExtension
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
         (await new CompileController(dockerClient).Compile(compileRequest)).ToResult()).RequireAuthorization();
         
+        app.MapGet("/file/all", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] AllFilesRequest allFilesRequest) =>
+        (await new FileController(httpContext, jwtService, databaseService).GetAllFiles(allFilesRequest)).ToResult()).RequireAuthorization();
         app.MapGet("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileReadRequest fileReadRequest) =>
         (await new FileController(httpContext, jwtService, databaseService).ReadFile(fileReadRequest)).ToResult()).RequireAuthorization();
         app.MapPost("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileCreationRequest fileCreationRequest) =>

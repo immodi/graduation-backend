@@ -33,6 +33,25 @@ public class FileController(HttpContext httpContext, JwtService jwtService, Data
         }
     }
     
+    public async Task<BaseResponse> GetAllFiles(AllFilesRequest? request)
+    {
+        if (request is null)
+        {
+            return new ErrorResponse("Invalid request");
+        }
+        
+        try
+        {
+            var databaseOutput = await databaseService.GetAllUserFiles(_userToken, jwtService);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
+    }
+    
     public async Task<BaseResponse> CreateFile(FileCreationRequest? request)
     {
         if (request is null)
@@ -109,4 +128,6 @@ public class FileController(HttpContext httpContext, JwtService jwtService, Data
             return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
         }
     }
+    
+    
 }
