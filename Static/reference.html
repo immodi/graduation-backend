@@ -134,7 +134,39 @@
 }</pre>
 </div>
 
-<div class="endpoint">
+    <div class="endpoint">
+    <h2>Read All Files</h2>
+    <h3>GET -> <a route="file/all"></a> (Requires Authorization)</h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
+    <h3>Request Body:</h3>
+    <pre>{
+    <span style="font-style: italic">Empty Request</span>
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "files": [
+        {
+            "fileId": number,
+            "fileName": "string",
+            "fileSizeInBytes": number
+        }
+    ],
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+        <h3>Response (400/500 Error):</h3>
+        <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+    
+    <div class="endpoint">
     <h2>Read File</h2>
     <h3>GET -> <a route="file"></a> (Requires Authorization)</h3>
     <div class="auth-note dark-mode">
