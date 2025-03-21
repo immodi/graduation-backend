@@ -42,9 +42,9 @@ public class ShareController(HttpContext httpContext, JwtService jwtService, Dat
         
         try
         {
-            if (string.IsNullOrEmpty(request.FileShareLink))
+            if (string.IsNullOrEmpty(request.FileShareCode))
             {
-                return new ErrorResponse("Invalid share url");
+                return new ErrorResponse("Invalid share code");
             }
             
             var databaseOutput = await databaseService.ReadSharedFile(request);

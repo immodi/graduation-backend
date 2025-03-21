@@ -32,5 +32,5 @@ public record FileShareRequest(
 
 
 public record FileShareReadRequest(
-    [property: JsonPropertyName("fileShareUrl")] string FileShareLink
+    [property: JsonPropertyName("fileShareCode")] string FileShareCode
 ): BaseRequest;

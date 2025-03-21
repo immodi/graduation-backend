@@ -51,8 +51,8 @@ public record FileDeleteResponse(
 
 
 public record FileShareResponse(
-    [property: JsonPropertyName("fileShareUrl")]
-    string FileShareLink
+    [property: JsonPropertyName("fileShareCode")]
+    string FileShareCode
 ): BaseResponse(200);
 
 

@@ -249,12 +249,13 @@ public class DatabaseService
         file.SharingCode = RandomStringGenerator.GenerateRandomString();
         await _database.UpdateAsync(file);
         
-        return new DatabaseOutput(true, new FileShareResponse($"{originUrl}/share/{file.SharingCode}"));
+        return new DatabaseOutput(true, new FileShareResponse(file.SharingCode));
     }
 
     public async Task<DatabaseOutput> ReadSharedFile(FileShareReadRequest request)
     {
-        var fileShareCode = request.FileShareLink.TrimEnd('/').Split('/').Last();
+        var fileShareCode = request.FileShareCode;
+
         // Retrieve the file by its ID
         var file = await _database.Table<File>()
             .Where(f => f.SharingCode == fileShareCode)
@@ -262,7 +263,7 @@ public class DatabaseService
         
         if (file == null)
         {
-            return new DatabaseOutput(false, new ErrorResponse("File not found, or share link was previously overriden"));
+            return new DatabaseOutput(false, new ErrorResponse("File not found, or share code was previously overriden"));
         }
         
         return new DatabaseOutput(true, new FileShareReadResponse(file.FileName, file.Content, Encoding.UTF8.GetBytes(file.Content).Length));
