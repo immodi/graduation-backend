@@ -8,10 +8,18 @@ public static class SingeltonsService
     
     public static void AddCustomSingeltons(this IServiceCollection services)
     {
-       
         services.AddSingleton<JwtService>();
         services.AddSingleton(new DatabaseService(DbPath));
-        services.AddSingleton(new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock"))
-            .CreateClient());
+        services.AddSingleton(
+            new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient());
+
+        var groqApiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+
+        if (string.IsNullOrWhiteSpace(groqApiKey))
+        {
+            throw new InvalidOperationException("GROQ_API_KEY environment variable is not set.");
+        }
+
+        services.AddSingleton(new GroqService(groqApiKey));
     }
 }
