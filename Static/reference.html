@@ -332,6 +332,28 @@
 }</pre>
 </div>
 
+
+<div class="endpoint">
+    <h2>AI Chatbot</h2>
+    <h3>GET -> <a route="ai"></a></h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "message": "string",
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "response": "string",
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
     <script>
        function toggleDarkMode() {
         if (document.body.classList.contains("dark-mode")) {
