@@ -332,13 +332,34 @@
 }</pre>
 </div>
 
-
 <div class="endpoint">
-    <h2>AI Chatbot</h2>
-    <h3>GET -> <a route="ai"></a></h3>
+    <h2>AI Models</h2>
+    <h3>GET -> <a route="ai/models"></a></h3>
     <h3>Request Body:</h3>
     <pre>{
-    "message": "string",
+    <span style="font-style: italic">Empty Request</span>
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "allModels": string[],
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+    
+<div class="endpoint">
+    <h2>AI Chatbot</h2>
+    <h3>POST -> <a route="ai"></a></h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "model": "string" | null,
+    "message": "string"
 }</pre>
     <h3>Response (200 OK):</h3>
     <pre>{

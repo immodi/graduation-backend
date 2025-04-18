@@ -2,6 +2,7 @@ namespace backend.DTOs.Requests;
 using System.Text.Json.Serialization;
 
 public record AiRequest(
+    [property: JsonPropertyName("model")] string? Model,
     [property: JsonPropertyName("message")] string Message
 ): BaseRequest;
 
