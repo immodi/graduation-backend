@@ -4,7 +4,7 @@ using backend.Services;
 
 namespace backend.Controllers;
 
-public class AiController(GroqService groqService)
+public class AiController(AiService aiService)
 {
     public async Task<BaseResponse> ChatWithTheAi(AiRequest? request)
     {
@@ -20,7 +20,7 @@ public class AiController(GroqService groqService)
 
         try
         {
-            var response = await groqService.GetFastLanguageModelExplanationAsync(request.Message);
+            var response = await aiService.GetFastLanguageModelExplanationAsync(request.Message);
             return new AiResponse(response);
 
         }

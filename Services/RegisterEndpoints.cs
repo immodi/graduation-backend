@@ -52,7 +52,7 @@ public static class WebApplicationExtension
         app.MapGet("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareReadRequest fileShareReadRequest) =>
         (await new ShareController(httpContext, jwtService, databaseService).ReadSharedFile(fileShareReadRequest)).ToResult());
         
-        app.MapGet("/ai", async (GroqService groqService, [FromBody] AiRequest aiRequest) =>
+        app.MapGet("/ai", async (AiService groqService, [FromBody] AiRequest aiRequest) =>
         (await new AiController(groqService).ChatWithTheAi(aiRequest)).ToResult());
 
         

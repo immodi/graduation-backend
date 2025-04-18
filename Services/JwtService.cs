@@ -50,7 +50,7 @@ public class JwtService(IConfiguration config)
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = config["Jwt:Issuer"],
                 IssuerSigningKey = key,
-                ClockSkew = TimeSpan.FromMinutes(5)
+                ClockSkew = TimeSpan.FromDays(99)
             };
 
             var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);

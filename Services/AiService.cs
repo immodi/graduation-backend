@@ -4,7 +4,7 @@ using backend.DTOs.Requests;
 
 namespace backend.Services;
 
-public class GroqService(string apiKey)
+public class AiService(string apiKey)
 {
     private readonly HttpClient _httpClient = new();
     
@@ -13,6 +13,19 @@ public class GroqService(string apiKey)
         const string url = "https://api.groq.com/openai/v1/chat/completions";
         const string model = "llama-3.3-70b-versatile";
 
+        // var models = new[]
+        // {
+        //     "llama-3.3-70b-versatile",
+        //     "codegen-350M-mono",
+        //     "gemma2-9b-it",
+        //     "llama-3.1-8b-instant",
+        //     "llama-guard-3-8b",
+        //     "llama3-70b-8192",
+        //     "llama3-8b-8192",
+        //     "whisper-large-v3",
+        //     "distil-whisper-large-v3-en"
+        // };
+        
         var requestBody = new
         {
             model,

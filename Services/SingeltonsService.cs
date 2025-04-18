@@ -20,6 +20,6 @@ public static class SingeltonsService
             throw new InvalidOperationException("GROQ_API_KEY environment variable is not set.");
         }
 
-        services.AddSingleton(new GroqService(groqApiKey));
+        services.AddSingleton(new AiService(groqApiKey));
     }
 }
