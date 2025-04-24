@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
 using backend.Services;
+using Microsoft.IdentityModel.Tokens;
 
 namespace backend.Controllers;
 
@@ -77,4 +78,48 @@ internal class AuthController(JwtService jwtService, DatabaseService databaseSer
             return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
         }
     }
+
+    public async Task<BaseResponse> RequestResetPassword(string userToken)
+    {
+        if (string.IsNullOrEmpty(userToken))
+        {   
+            return new ErrorResponse("Invalid request");
+        }
+
+        try
+        {
+            var databaseOutput = await databaseService.GetUserRecoveryDataAsync(jwtService, userToken);
+            var userRecoveryData = databaseOutput.Response as ResetData;
+            var resetResponse = await EmailService.Send(userRecoveryData.Email, userRecoveryData.Code);
+            return resetResponse;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
+        
+    }
+    
+    public async Task<BaseResponse> ResetPassword(string userToken, ResetRequest? request)
+    {
+        if (request is null)
+        {
+            return new ErrorResponse("Invalid request");
+        }
+
+        try
+        {
+            var databaseOutput = await databaseService.ResetPasswordAsync(jwtService, userToken, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
+        
+    }
+
+
 }

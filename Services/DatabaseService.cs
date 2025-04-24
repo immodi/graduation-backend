@@ -42,12 +42,15 @@ public class DatabaseService
 
         // Hash the password (implement a proper hashing mechanism)
         var passwordHash = PasswordHasher.HashPassword(request.Password);
+        var resetCode = RandomStringGenerator.GenerateRandomString();
 
         // Create a new user
         var newUser = new User
         {
             Username = request.Username,
-            PasswordHash = passwordHash
+            Email = request.Email,
+            PasswordHash = passwordHash,
+            ResetCode = resetCode
         };
 
         // Insert the new user into the database
@@ -77,6 +80,65 @@ public class DatabaseService
         
         var token = jwtService.GenerateToken(user.Username);
         return new DatabaseOutput(true, new AuthResponse(user.Id, token));
+    }
+    
+    public async Task<DatabaseOutput> GetUserRecoveryDataAsync(JwtService jwtService, string userToken)
+    {
+        try
+        {
+            var tokenOwner = jwtService.GetUsernameFromToken(userToken);
+            // Retrieve the user by username
+            var user = await _database.Table<User>()
+                .Where(u => u.Username == tokenOwner)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+            {
+                return new DatabaseOutput(false, new ErrorResponse("User not found"));
+            }
+            
+            return new DatabaseOutput(true, new ResetData(user.Email, user.ResetCode));
+        }
+        catch (Exception ex)
+        {
+            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed: {ex.Message}"));
+        }
+    }
+
+    
+    public async Task<DatabaseOutput> ResetPasswordAsync(JwtService jwtService, string userToken, ResetRequest request)
+    {
+        try
+        {
+            var tokenOwner = jwtService.GetUsernameFromToken(userToken);
+            // Retrieve the user by username
+            var user = await _database.Table<User>()
+                .Where(u => u.Username == tokenOwner)
+                .FirstOrDefaultAsync();
+            
+            if (user == null)
+            {
+                return new DatabaseOutput(false, new ErrorResponse("User not found"));
+            }
+
+            if (user.ResetCode != request.Code)
+            {
+                return new DatabaseOutput(false, new ErrorResponse("This token is expired, please request a new one"));
+            }
+        
+            // Hash the new password
+            user.PasswordHash = PasswordHasher.HashPassword(request.NewPassword);
+            user.ResetCode = RandomStringGenerator.GenerateRandomString();
+        
+            // Update user in database
+            await _database.UpdateAsync(user);
+            
+            return await SignInAsync(jwtService, new AuthRequest(user.Username, user.Email, request.NewPassword));
+        }
+        catch (Exception ex)
+        {
+            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed: {ex.Message}"));
+        }
     }
     
     public async Task<DatabaseOutput> ReadFile(string userToken, JwtService jwtService, FileReadRequest request)
