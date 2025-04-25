@@ -110,15 +110,10 @@
 
 <div class="endpoint">
     <h2>Request a Password Reset</h2>
-    <h3>GET -> <a route="request-password-reset"></a></h3>
-    <div class="auth-note dark-mode">
-        Authorization Note:
-        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
-        <pre>Authorization: Bearer {token}</pre>
-    </div>
+    <h3>POST -> <a route="request-password-reset"></a></h3>
     <h3>Request Body:</h3>
     <pre>{
-    <span style="font-style: italic">Empty Request</span>
+    "username": "string",
 }</pre>
     <h3>Response (200 OK):</h3>
     <pre>{
@@ -137,14 +132,10 @@
 <div class="endpoint">
     <h2>Update User Password</h2>
     <h3>POST -> <a route="reset-password"></a></h3>
-    <div class="auth-note dark-mode">
-        Authorization Note:
-        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
-        <pre>Authorization: Bearer {token}</pre>
-    </div>
     <h3>Request Body:</h3>
     <pre>{
     "code": "string",
+    "username": "string",
     "newPassword": "string"
 }</pre>
     <h3>Response (200 OK):</h3>

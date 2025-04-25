@@ -79,16 +79,21 @@ internal class AuthController(JwtService jwtService, DatabaseService databaseSer
         }
     }
 
-    public async Task<BaseResponse> RequestResetPassword(string userToken)
+    public async Task<BaseResponse> RequestResetPassword(AuthResetRequest? request)
     {
-        if (string.IsNullOrEmpty(userToken))
-        {   
+        
+        if (request is null)
+        {
             return new ErrorResponse("Invalid request");
         }
 
         try
         {
-            var databaseOutput = await databaseService.GetUserRecoveryDataAsync(jwtService, userToken);
+            var databaseOutput = await databaseService.GetUserRecoveryDataAsync(request);
+            if (!databaseOutput.IsSuccess)
+            {
+                return new ErrorResponse((databaseOutput.Response as ErrorResponse).ErrorMessage);
+            }
             var userRecoveryData = databaseOutput.Response as ResetData;
             var resetResponse = await EmailService.Send(userRecoveryData.Email, userRecoveryData.Code);
             return resetResponse;
@@ -101,7 +106,7 @@ internal class AuthController(JwtService jwtService, DatabaseService databaseSer
         
     }
     
-    public async Task<BaseResponse> ResetPassword(string userToken, ResetRequest? request)
+    public async Task<BaseResponse> ResetPassword(ResetRequest? request)
     {
         if (request is null)
         {
@@ -110,7 +115,7 @@ internal class AuthController(JwtService jwtService, DatabaseService databaseSer
 
         try
         {
-            var databaseOutput = await databaseService.ResetPasswordAsync(jwtService, userToken, request);
+            var databaseOutput = await databaseService.ResetPasswordAsync(jwtService, request);
             return databaseOutput.Response;
         }
         catch (Exception e)

@@ -82,16 +82,15 @@ public class DatabaseService
         return new DatabaseOutput(true, new AuthResponse(user.Id, token));
     }
     
-    public async Task<DatabaseOutput> GetUserRecoveryDataAsync(JwtService jwtService, string userToken)
+    public async Task<DatabaseOutput> GetUserRecoveryDataAsync(AuthResetRequest request)
     {
         try
         {
-            var tokenOwner = jwtService.GetUsernameFromToken(userToken);
             // Retrieve the user by username
             var user = await _database.Table<User>()
-                .Where(u => u.Username == tokenOwner)
+                .Where(u => u.Username == request.Username)
                 .FirstOrDefaultAsync();
-            
+
             if (user == null)
             {
                 return new DatabaseOutput(false, new ErrorResponse("User not found"));
@@ -106,24 +105,23 @@ public class DatabaseService
     }
 
     
-    public async Task<DatabaseOutput> ResetPasswordAsync(JwtService jwtService, string userToken, ResetRequest request)
+    public async Task<DatabaseOutput> ResetPasswordAsync(JwtService jwtService, ResetRequest request)
     {
         try
         {
-            var tokenOwner = jwtService.GetUsernameFromToken(userToken);
             // Retrieve the user by username
             var user = await _database.Table<User>()
-                .Where(u => u.Username == tokenOwner)
+                .Where(u => u.Username == request.Username && u.ResetCode == request.Code)
                 .FirstOrDefaultAsync();
-            
+
             if (user == null)
             {
-                return new DatabaseOutput(false, new ErrorResponse("User not found"));
+                return new DatabaseOutput(false, new ErrorResponse("User not found or the reset code is incorrect"));
             }
 
             if (user.ResetCode != request.Code)
             {
-                return new DatabaseOutput(false, new ErrorResponse("This token is expired, please request a new one"));
+                return new DatabaseOutput(false, new ErrorResponse("This reset code is expired, please request a new one"));
             }
         
             // Hash the new password

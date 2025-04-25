@@ -8,7 +8,13 @@ public record AuthRequest(
     [property: JsonPropertyName("password")] string Password
 ): BaseRequest;
 
+public record AuthResetRequest(
+    [property: JsonPropertyName("username")] string Username
+): BaseRequest;
+
+
 public record ResetRequest(
     [property: JsonPropertyName("code")] string Code,
+    [property: JsonPropertyName("username")] string Username,
     [property: JsonPropertyName("newPassword")] string NewPassword
 ): BaseRequest;
