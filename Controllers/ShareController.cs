@@ -1,3 +1,4 @@
+using System.Text.Json;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
 using backend.Services;
@@ -32,28 +33,51 @@ public class ShareController(HttpContext httpContext, JwtService jwtService, Dat
         }
     }
 
-    public async Task<BaseResponse> ReadSharedFile(FileShareReadRequest? request)
+    public async Task<BaseResponse> ReadSharedFile()
     {
-        
-        if (request is null)
-        {
-            return new ErrorResponse("Invalid request");
-        }
-        
+        var queryParams = httpContext.Request.Query;
+
         try
         {
-            if (string.IsNullOrEmpty(request.FileShareCode))
+            // Step 1: Attempt to read the request body to get FileShareReadRequest
+            FileShareReadRequest? request = null;
+            if (httpContext.Request.ContentLength > 0)
             {
-                return new ErrorResponse("Invalid share code");
+                using var reader = new StreamReader(httpContext.Request.Body);
+                var bodyText = await reader.ReadToEndAsync();
+
+                if (!string.IsNullOrWhiteSpace(bodyText))
+                {
+                    // Deserialize the body into FileShareReadRequest
+                    request = JsonSerializer.Deserialize<FileShareReadRequest>(bodyText);
+                }
             }
-            
-            var databaseOutput = await databaseService.ReadSharedFile(request);
+
+            // Step 2: If no valid request in the body, try to get 'fileShareCode' from the query parameters
+            var finalShareCode = "";
+
+            if (request != null && !string.IsNullOrEmpty(request.FileShareCode))
+            {
+                finalShareCode = request.FileShareCode; // Use fileShareCode from body request
+            }
+            else
+            {
+                if (!queryParams.TryGetValue("fileShareCode", out var fileShareCodeValue) || string.IsNullOrEmpty(fileShareCodeValue))
+                {
+                    return new ErrorResponse("Invalid share code");
+                }
+                finalShareCode = fileShareCodeValue;
+            }
+
+            // Step 3: Use the finalShareCode to fetch the shared file
+            var databaseOutput = await databaseService.ReadSharedFile(finalShareCode);
             return databaseOutput.Response;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+            return new ErrorResponse("An error occurred, please try again later") { StatusCode = 500 };
         }
     }
+
 }

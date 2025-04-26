@@ -40,10 +40,10 @@ public static class WebApplicationExtension
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
         (await new CompileController(dockerClient).Compile(compileRequest)).ToResult()).RequireAuthorization();
         
-        app.MapGet("/file/all", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] AllFilesRequest allFilesRequest) =>
-        (await new FileController(httpContext, jwtService, databaseService).GetAllFiles(allFilesRequest)).ToResult()).RequireAuthorization();
-        app.MapGet("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileReadRequest fileReadRequest) =>
-        (await new FileController(httpContext, jwtService, databaseService).ReadFile(fileReadRequest)).ToResult()).RequireAuthorization();
+        app.MapGet("/file/all", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService) =>
+        (await new FileController(httpContext, jwtService, databaseService).GetAllFiles()).ToResult()).RequireAuthorization();
+        app.MapGet("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService) =>
+        (await new FileController(httpContext, jwtService, databaseService).ReadFile()).ToResult()).RequireAuthorization();
         app.MapPost("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileCreationRequest fileCreationRequest) =>
         (await new FileController(httpContext, jwtService, databaseService).CreateFile(fileCreationRequest)).ToResult()).RequireAuthorization();
         app.MapPatch("/file", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileUpdateRequest fileUpdateRequest) =>
@@ -54,8 +54,8 @@ public static class WebApplicationExtension
         
         app.MapPost("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareRequest fileShareRequest) =>
         (await new ShareController(httpContext, jwtService, databaseService).ShareFile( userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim(), request: fileShareRequest) ).ToResult()).RequireAuthorization();
-        app.MapGet("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareReadRequest fileShareReadRequest) =>
-        (await new ShareController(httpContext, jwtService, databaseService).ReadSharedFile(fileShareReadRequest)).ToResult());
+        app.MapGet("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService) =>
+        (await new ShareController(httpContext, jwtService, databaseService).ReadSharedFile()).ToResult());
         
         app.MapPost("/ai", async (AiService groqService, [FromBody] AiRequest aiRequest) =>
         (await new AiController(groqService).ChatWithTheAi(aiRequest)).ToResult());

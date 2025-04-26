@@ -139,11 +139,11 @@ public class DatabaseService
         }
     }
     
-    public async Task<DatabaseOutput> ReadFile(string userToken, JwtService jwtService, FileReadRequest request)
+    public async Task<DatabaseOutput> ReadFile(string userToken, JwtService jwtService, int fileId)
     {
         // Retrieve the user by username
         var file = await _database.Table<File>()
-            .Where(f => f.Id == request.FileId)
+            .Where(f => f.Id == fileId)
             .FirstOrDefaultAsync();
         
         if (file == null)
@@ -312,10 +312,8 @@ public class DatabaseService
         return new DatabaseOutput(true, new FileShareResponse(file.SharingCode));
     }
 
-    public async Task<DatabaseOutput> ReadSharedFile(FileShareReadRequest request)
+    public async Task<DatabaseOutput> ReadSharedFile(string fileShareCode)
     {
-        var fileShareCode = request.FileShareCode;
-
         // Retrieve the file by its ID
         var file = await _database.Table<File>()
             .Where(f => f.SharingCode == fileShareCode)

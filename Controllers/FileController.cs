@@ -1,3 +1,4 @@
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
@@ -9,36 +10,61 @@ public class FileController(HttpContext httpContext, JwtService jwtService, Data
 {
     private readonly string _userToken = httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim();
        
-    public async Task<BaseResponse> ReadFile(FileReadRequest? request)
+    public async Task<BaseResponse> ReadFile()
     {
-        if (request is null)
-        {
-            return new ErrorResponse("Invalid request");
-        }
-        
+        var queryParams = httpContext.Request.Query;
+        Console.WriteLine(queryParams.ToString());
+
         try
         {
-            if (request.FileId < 1)
+            // Step 1: Attempt to read the request body to get FileReadRequest
+            FileReadRequest? request = null;
+            if (httpContext.Request.ContentLength > 0)
             {
-                return new ErrorResponse("Invalid file ID");
+                using var reader = new StreamReader(httpContext.Request.Body);
+                var bodyText = await reader.ReadToEndAsync();
+
+                if (!string.IsNullOrWhiteSpace(bodyText))
+                {
+                    // Deserialize the body into FileReadRequest
+                    request = JsonSerializer.Deserialize<FileReadRequest>(bodyText);
+                }
             }
 
-            var databaseOutput = await databaseService.ReadFile(_userToken, jwtService, request);
+            // Step 2: If no valid request, try to get 'fileId' from the query parameters
+            var finalFileId = -1;
+
+            if (request != null && request.FileId > 0)
+            {
+                finalFileId = request.FileId; // Use fileId from body request
+            }
+            else
+            {
+                if (!queryParams.TryGetValue("fileId", out var fileIdValue) || 
+                    !int.TryParse(fileIdValue, out finalFileId) || 
+                    finalFileId < 1)
+                {
+                    return new ErrorResponse("Invalid file ID");
+                }
+            }
+
+            // Step 3: Use the finalFileId to fetch the file
+            var databaseOutput = await databaseService.ReadFile(_userToken, jwtService, finalFileId);
             return databaseOutput.Response;
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+            return new ErrorResponse("An error occurred, please try again later") { StatusCode = 500 };
         }
     }
-    
-    public async Task<BaseResponse> GetAllFiles(AllFilesRequest? request)
+
+    public async Task<BaseResponse> GetAllFiles()
     {
-        if (request is null)
-        {
-            return new ErrorResponse("Invalid request");
-        }
+        // if (request is null)
+        // {
+        //     return new ErrorResponse("Invalid request");
+        // }
         
         try
         {
