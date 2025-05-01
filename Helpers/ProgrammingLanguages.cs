@@ -25,10 +25,10 @@ public static class ProgrammingLanguages
         },
         {
             "cpp", new LanguageConfig(
-                "gcc:12",
+                "frolvlad/alpine-gxx:latest",
                 s =>
                 [
-                    "bash", "-c",
+                    "sh", "-c",
                     "cat <<EOF > main.cpp\n" + s + "\nEOF\n" +
                     "g++ -std=c++17 main.cpp -o program && ./program"
                 ]
