@@ -14,10 +14,23 @@ public static class ProgrammingLanguages
                 s =>
                 [
                     "bash", "-c",
-                    "dotnet tool install -g dotnet-script > /dev/null 2>&1 && " +
-                    "export PATH=\"$PATH:/root/.dotnet/tools\" && " +
-                    "cat <<EOF > script.csx\n" + s + "\nEOF\n" +
-                    "dotnet-script script.csx"
+                    "mkdir -p /app && " +
+                    "cat <<EOF > /app/Program.cs\n" + s + "\nEOF\n" +
+                    "cd /app && " +
+                    "dotnet new console --no-restore --force > /dev/null 2>&1 && " +
+                    "dotnet build --nologo -v q && " +
+                    "dotnet run --no-build"
+                ]
+            )
+        },
+        {
+            "cpp", new LanguageConfig(
+                "gcc:12",
+                s =>
+                [
+                    "bash", "-c",
+                    "cat <<EOF > main.cpp\n" + s + "\nEOF\n" +
+                    "g++ -std=c++17 main.cpp -o program && ./program"
                 ]
             )
         },
@@ -32,7 +45,5 @@ public static class ProgrammingLanguages
                 ]
             )
         }
-
-
     };
 }
