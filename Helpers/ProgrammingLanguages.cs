@@ -15,11 +15,11 @@ public static class ProgrammingLanguages
                 [
                     "bash", "-c",
                     "mkdir -p /app && " +
-                    "cat <<EOF > /app/Program.cs\n" + s + "\nEOF\n" +
+                    "dotnet new console -o /app --no-restore --force > /dev/null && " +
+                    "echo '" + s.Replace("'", "'\\''") + "' > /app/Program.cs && " +
                     "cd /app && " +
-                    "dotnet new console --no-restore --force > /dev/null 2>&1 && " +
-                    "dotnet build --nologo -v q && " +
-                    "dotnet run --no-build"
+                    "(dotnet build -v q 2>&1 > /dev/null || true) && " +  // suppress build logs, ignore errors here
+                    "dotnet run --no-build --project /app 2>&1"
                 ]
             )
         },
