@@ -1,3 +1,6 @@
+using backend.Contexts;
+using backend.Interfaces;
+using backend.Repositories;
 using Docker.DotNet;
 
 namespace backend.Services;
@@ -8,8 +11,31 @@ public static class SingeltonsService
     
     public static void AddCustomSingeltons(this IServiceCollection services)
     {
+        services.AddSingleton(new DbContext(DbPath));
+        services.AddSingleton<IUserRepository, UserRepository>(provider =>
+        {
+            var dbContext = provider.GetRequiredService<DbContext>();
+            
+            return new UserRepository(dbContext.Database);
+        });
+        
+        services.AddSingleton<IFileRepository, FileRepository>(provider =>
+        {
+            var dbContext = provider.GetRequiredService<DbContext>();
+            
+            return new FileRepository(dbContext.Database);
+        });
+
         services.AddSingleton<JwtService>();
-        services.AddSingleton(new DatabaseService(DbPath));
+
+        services.AddSingleton<DatabaseService>(provider =>
+        {
+            var userRepository = provider.GetRequiredService<IUserRepository>();
+            var fileRepository = provider.GetRequiredService<IFileRepository>();
+            
+            return new DatabaseService(userRepository, fileRepository);
+        });
+
         services.AddSingleton(
             new DockerClientConfiguration(new Uri("unix:///var/run/docker.sock")).CreateClient());
 

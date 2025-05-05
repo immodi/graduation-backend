@@ -5,26 +5,31 @@ using backend.Helpers;
 
 namespace backend.Services;
 
-public class DockerService(DockerClient dockerClient, string language, string codeToRun)
+public class DockerService(DockerClient dockerClient, string language, string codeToRun, int timeoutSeconds = 30)
 {
 
     public async Task<BaseResponse> Run()
     {
-        if (ProgrammingLanguages.Commands.TryGetValue(language, out var commandTemplate))
+        if (!ProgrammingLanguages.Commands.TryGetValue(language, out var commandTemplate))
+            return new ErrorResponse("There was an error running the programming language.");
+
+        var commandArray = commandTemplate.Command(codeToRun);
+
+        var containerConfig = new CreateContainerParameters
         {
-            var commandArray = commandTemplate.Command(codeToRun);
+            Image = commandTemplate.ImageName,
+            Cmd = commandArray,
+            HostConfig = new HostConfig { AutoRemove = false }
+        };
 
-            var containerConfig = new CreateContainerParameters
-            {
-                Image = commandTemplate.ImageName,
-                Cmd = commandArray,
-                HostConfig = new HostConfig { AutoRemove = true }
-            };
+        var response = await dockerClient.Containers.CreateContainerAsync(containerConfig);
+        var containerId = response.ID;
 
-            var response = await dockerClient.Containers.CreateContainerAsync(containerConfig);
-            var containerId = response.ID;
-
+        try
+        {
             await dockerClient.Containers.StartContainerAsync(containerId, null);
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
 
             using var logsStream = await dockerClient.Containers.GetContainerLogsAsync(containerId, false,
                 new ContainerLogsParameters
@@ -32,12 +37,19 @@ public class DockerService(DockerClient dockerClient, string language, string co
                     ShowStdout = true,
                     ShowStderr = true,
                     Follow = true
-                }, CancellationToken.None);
+                }, cts.Token);
 
             using var stdout = new MemoryStream();
             using var stderr = new MemoryStream();
 
-            await logsStream.CopyOutputToAsync(null, stdout, stderr, CancellationToken.None);
+            try
+            {
+                await logsStream.CopyOutputToAsync(null, stdout, stderr, cts.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                await dockerClient.Containers.StopContainerAsync(containerId, new ContainerStopParameters());
+            }
 
             stdout.Position = 0;
             stderr.Position = 0;
@@ -48,15 +60,25 @@ public class DockerService(DockerClient dockerClient, string language, string co
             var stdoutOutput = await stdoutReader.ReadToEndAsync();
             var stderrOutput = await stderrReader.ReadToEndAsync();
 
-            // Combine both outputs to ensure all logs are captured
             var combinedOutput = $"{stdoutOutput.Trim()}\n{stderrOutput.Trim()}".Trim();
             var output = string.IsNullOrEmpty(combinedOutput) ? "No output was generated." : combinedOutput;
-            
+
             return new CompileResponse(output);
         }
-        else
+        catch (Exception ex)
         {
-            return new ErrorResponse("There was an error running the programming language.");
+            return new ErrorResponse($"Docker execution error: {ex.Message}");
+        }
+        finally
+        {
+            try
+            {
+                await dockerClient.Containers.RemoveContainerAsync(containerId, new ContainerRemoveParameters { Force = true });
+            }
+            catch (Exception ex)
+            {
+                Console.Error.WriteLine($"Failed to remove container {containerId}: {ex.Message}");
+            }
         }
     }
 }

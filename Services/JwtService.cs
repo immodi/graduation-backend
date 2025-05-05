@@ -23,7 +23,7 @@ public class JwtService(IConfiguration config)
         var token = new JwtSecurityToken(
             issuer: config["Jwt:Issuer"],
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddDays(30),
             signingCredentials: credentials
         );
 
@@ -50,7 +50,7 @@ public class JwtService(IConfiguration config)
                 ValidateIssuerSigningKey = true,
                 ValidIssuer = config["Jwt:Issuer"],
                 IssuerSigningKey = key,
-                ClockSkew = TimeSpan.FromDays(99)
+                ClockSkew = TimeSpan.FromMinutes(5)
             };
 
             var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
