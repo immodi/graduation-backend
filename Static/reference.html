@@ -75,6 +75,13 @@
   "statusCode": number,
   "token": "string"
 }</pre>
+    <h3>Response (401 Unauthorized):</h3>
+    <p>Returns when inputting the wrong credentials.</p>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
     <h3>Response (400/500 Error):</h3>
     <pre>{
   "dateTime": "string",
@@ -143,6 +150,13 @@
     "dateTime": "string",
     "statusCode": number,
     "token": "string"
+}</pre>
+    <h3>Response (401 Unauthorized):</h3>
+    <p>Returns when the user inputted the wrong reset code, or the if the inputted reset code is expired</p>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
 }</pre>
     <h3>Response (400/500 Error):</h3>
     <pre>{

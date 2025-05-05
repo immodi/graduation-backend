@@ -43,11 +43,11 @@ public class UserRepository(SQLiteAsyncConnection database) : IUserRepository
             .FirstOrDefaultAsync();
 
         if (user == null)
-            return new DatabaseOutput(false, new ErrorResponse("Username not found"));
+            return new DatabaseOutput(false, new ErrorResponse("Username not found"){StatusCode = 401});
 
         var passwordHash = PasswordHasher.HashPassword(request.Password);
         if (user.PasswordHash != passwordHash)
-            return new DatabaseOutput(false, new ErrorResponse("Invalid password"));
+            return new DatabaseOutput(false, new ErrorResponse("Invalid password"){StatusCode = 401});
 
         var token = jwtService.GenerateToken(user.Username);
         return new DatabaseOutput(true, new AuthResponse(user.Id, token));
@@ -81,10 +81,10 @@ public class UserRepository(SQLiteAsyncConnection database) : IUserRepository
                 .FirstOrDefaultAsync();
 
             if (user == null)
-                return new DatabaseOutput(false, new ErrorResponse("User not found or the reset code is incorrect"));
+                return new DatabaseOutput(false, new ErrorResponse("User not found or the reset code is incorrect"){StatusCode = 401});
 
             if (user.ResetCode != request.Code)
-                return new DatabaseOutput(false, new ErrorResponse("This reset code is expired, please request a new one"));
+                return new DatabaseOutput(false, new ErrorResponse("This reset code is expired, please request a new one"){StatusCode = 401});
 
             user.PasswordHash = PasswordHasher.HashPassword(request.NewPassword);
             user.ResetCode = RandomStringGenerator.GenerateRandomString();
@@ -95,7 +95,7 @@ public class UserRepository(SQLiteAsyncConnection database) : IUserRepository
         }
         catch (Exception ex)
         {
-            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed: {ex.Message}"));
+            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed: {ex.Message}"){StatusCode = 500});
         }
     }
 }

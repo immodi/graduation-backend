@@ -1,5 +1,6 @@
 
 using System.Text.Json.Serialization;
+using backend.Models;
 
 namespace backend.DTOs.Responses;
 
