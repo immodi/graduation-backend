@@ -52,10 +52,12 @@ public static class WebApplicationExtension
         (await new FileController(httpContext, jwtService, databaseService).DeleteFile(fileDeleteRequest)).ToResult()).RequireAuthorization();
 
         
-        app.MapPost("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareRequest fileShareRequest) =>
-        (await new ShareController(httpContext, jwtService, databaseService).ShareFile( userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim(), request: fileShareRequest) ).ToResult()).RequireAuthorization();
         app.MapGet("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService) =>
         (await new ShareController(httpContext, jwtService, databaseService).ReadSharedFile()).ToResult());
+        app.MapPatch("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService,  [FromBody] SharedFileUpdateRequest sharedFileUpdateRequest) =>
+            (await new ShareController(httpContext, jwtService, databaseService).UpdateSharedFile(sharedFileUpdateRequest)).ToResult());
+        app.MapPost("/share", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] FileShareRequest fileShareRequest) =>
+        (await new ShareController(httpContext, jwtService, databaseService).ShareFile( userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim(), request: fileShareRequest) ).ToResult()).RequireAuthorization();
         
         app.MapPost("/ai", async (AiService groqService, [FromBody] AiRequest aiRequest) =>
         (await new AiController(groqService).ChatWithTheAi(aiRequest)).ToResult());

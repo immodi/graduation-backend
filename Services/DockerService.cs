@@ -41,7 +41,7 @@ public class DockerService(DockerClient dockerClient, string language, string co
 
             using var stdout = new MemoryStream();
             using var stderr = new MemoryStream();
-
+            
             try
             {
                 await logsStream.CopyOutputToAsync(null, stdout, stderr, cts.Token);
@@ -63,7 +63,7 @@ public class DockerService(DockerClient dockerClient, string language, string co
             var combinedOutput = $"{stdoutOutput.Trim()}\n{stderrOutput.Trim()}".Trim();
             var output = string.IsNullOrEmpty(combinedOutput) ? "No output was generated." : combinedOutput;
 
-            return new CompileResponse(output);
+            return new CompileResponse(output, string.IsNullOrEmpty(stderrOutput));
         }
         catch (Exception ex)
         {

@@ -170,6 +170,7 @@
     <pre>{
   "dateTime": "string",
   "statusCode": number,
+  "isSuccess": boolean,
   "output": "string"
 }</pre>
     <h3>Response (400/500 Error):</h3>
@@ -367,6 +368,33 @@
     "fileName": "string",
     "fileContent": "string",
     "fileSizeInBytes": number,
+    "dateTime": "string",
+    "statusCode": number,
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
+<div class="endpoint">
+    <h2>Update Shared File</h2>
+    <h3>PATCH -> <a route="share"></a></h3>
+    <h3>Request Body:</h3>
+    <pre>{
+    "fileShareCode": "string",
+    "newFileName": "string" | null ,
+    "newFileContent": "string" | null
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "fileName": "string",
+    "fileContent": "string",
+    "fileCreationDate": "string",
+    "lastModifiedDate": "string",
+    "fileSizeInBytes": number
     "dateTime": "string",
     "statusCode": number,
 }</pre>

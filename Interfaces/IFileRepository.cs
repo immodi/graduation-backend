@@ -13,4 +13,5 @@ public interface IFileRepository
     Task<DatabaseOutput> DeleteFile(string userToken, JwtService jwtService, FileDeleteRequest request);
     Task<DatabaseOutput> ShareFile(string originUrl, string userToken, JwtService jwtService, FileShareRequest request);
     Task<DatabaseOutput> ReadSharedFile(string fileShareCode);
+    Task<DatabaseOutput> UpdateFileWithShareCode(SharedFileUpdateRequest request);
 }

@@ -7,15 +7,15 @@ namespace backend.Controllers;
 
 public class ShareController(HttpContext httpContext, JwtService jwtService, DatabaseService databaseService)
 {
-    private readonly string _originUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";  
-    
+    private readonly string _originUrl = $"{httpContext.Request.Scheme}://{httpContext.Request.Host}";
+
     public async Task<BaseResponse> ShareFile(string userToken, FileShareRequest? request)
     {
         if (request is null)
         {
             return new ErrorResponse("Invalid request");
         }
-        
+
         try
         {
             if (request.FileId < 1)
@@ -29,7 +29,7 @@ public class ShareController(HttpContext httpContext, JwtService jwtService, Dat
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+            return new ErrorResponse("An error occured, please try again later") { StatusCode = 500 };
         }
     }
 
@@ -62,10 +62,12 @@ public class ShareController(HttpContext httpContext, JwtService jwtService, Dat
             }
             else
             {
-                if (!queryParams.TryGetValue("fileShareCode", out var fileShareCodeValue) || string.IsNullOrEmpty(fileShareCodeValue))
+                if (!queryParams.TryGetValue("fileShareCode", out var fileShareCodeValue) ||
+                    string.IsNullOrEmpty(fileShareCodeValue))
                 {
                     return new ErrorResponse("Invalid share code");
                 }
+
                 finalShareCode = fileShareCodeValue;
             }
 
@@ -80,4 +82,27 @@ public class ShareController(HttpContext httpContext, JwtService jwtService, Dat
         }
     }
 
+    public async Task<BaseResponse> UpdateSharedFile(SharedFileUpdateRequest? request)
+    {
+        if (request is null)
+        {
+            return new ErrorResponse("Invalid request");
+        }
+
+        try
+        {
+            if (string.IsNullOrEmpty(request.FileShareCode))
+            {
+                return new ErrorResponse("Invalid file share code");
+            }
+
+            var databaseOutput = await databaseService.UpdateSharedFile(request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later") { StatusCode = 500 };
+        }
+    }
 }

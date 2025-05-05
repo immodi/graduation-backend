@@ -22,6 +22,12 @@ public record FileUpdateRequest(
     [property: JsonPropertyName("newFileContent")] string NewFileContent
 ): BaseRequest;
 
+public record SharedFileUpdateRequest(
+    [property: JsonPropertyName("fileShareCode")] string FileShareCode,
+    [property: JsonPropertyName("newFileName")] string NewFileName,
+    [property: JsonPropertyName("newFileContent")] string NewFileContent
+): BaseRequest;
+
 public record FileDeleteRequest(
     int FileId
 ): FileReadRequest(FileId);

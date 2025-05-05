@@ -58,4 +58,8 @@ public class DatabaseService(IUserRepository userRepository, IFileRepository fil
     public Task<DatabaseOutput> ReadSharedFile(string shareCode) =>
         fileRepository.ReadSharedFile(shareCode);
   
+    public Task<DatabaseOutput> UpdateSharedFile(SharedFileUpdateRequest request) =>
+        fileRepository.UpdateFileWithShareCode(request);
+
+    
 }

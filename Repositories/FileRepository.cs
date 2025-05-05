@@ -127,7 +127,7 @@ public class FileRepository(SQLiteAsyncConnection database) : IFileRepository
         await database.UpdateAsync(file);
         return new DatabaseOutput(true, new FileUpdateResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
     }
-
+    
     public async Task<DatabaseOutput> DeleteFile(string userToken, JwtService jwtService, FileDeleteRequest request)
     {
         // Retrieve the user by username
@@ -200,4 +200,34 @@ public class FileRepository(SQLiteAsyncConnection database) : IFileRepository
         
         return new DatabaseOutput(true, new FileShareReadResponse(file.FileName, file.Content, Encoding.UTF8.GetBytes(file.Content).Length));
     }
+    
+    public async Task<DatabaseOutput> UpdateFileWithShareCode(SharedFileUpdateRequest request)
+    {
+        // Retrieve the file by its ID
+        var file = await database.Table<File>()
+            .Where(f => f.SharingCode == request.FileShareCode)
+            .FirstOrDefaultAsync();
+
+        if (file == null)
+        {
+            return new DatabaseOutput(false, new ErrorResponse("File not found"));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.NewFileName))
+        {
+            file.FileName = request.NewFileName;
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.NewFileContent))
+        {
+            file.Content = request.NewFileContent;
+        }
+        
+        file.LastModifiedDate = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm:ss");
+
+        // Save changes to the database
+        await database.UpdateAsync(file);
+        return new DatabaseOutput(true, new FileUpdateResponse(file.FileName, file.Content,  file.CreationDate, file.LastModifiedDate, Encoding.UTF8.GetBytes(file.Content).Length));
+    }
+
 }
