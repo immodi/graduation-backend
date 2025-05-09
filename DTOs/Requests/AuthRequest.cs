@@ -12,6 +12,10 @@ public record AuthResetRequest(
     [property: JsonPropertyName("username")] string Username
 ): BaseRequest;
 
+public record AuthUpdateRequest(
+    [property: JsonPropertyName("newUsername")] string? Username,
+    [property: JsonPropertyName("newEmail")] string? Email
+): BaseRequest;
 
 public record ResetRequest(
     [property: JsonPropertyName("code")] string Code,

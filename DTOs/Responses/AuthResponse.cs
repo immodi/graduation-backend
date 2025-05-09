@@ -14,6 +14,12 @@ public record ResetResponse(
     [property: JsonPropertyName("email")] string Email
 ): BaseResponse(200);
 
+
+public record AuthUpdateResponse(
+    [property: JsonPropertyName("username")] string Username,
+    [property: JsonPropertyName("email")] string Email
+): BaseResponse(200);
+
 public record ResetData(
     [property: JsonPropertyName("email")] string Email,
     [property: JsonPropertyName("code")] string Code

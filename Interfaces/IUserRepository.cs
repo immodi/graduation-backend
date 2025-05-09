@@ -10,4 +10,5 @@ public interface IUserRepository
     Task<DatabaseOutput> SignInAsync(JwtService jwtService, AuthRequest request);
     Task<DatabaseOutput> GetUserRecoveryDataAsync(AuthResetRequest request);
     Task<DatabaseOutput> ResetPasswordAsync(JwtService jwtService, ResetRequest request);
+    Task<DatabaseOutput> UpdateUserData(JwtService jwtService, string userToken, AuthUpdateRequest request);
 }

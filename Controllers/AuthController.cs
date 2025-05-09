@@ -125,6 +125,26 @@ internal class AuthController(JwtService jwtService, DatabaseService databaseSer
         }
         
     }
+    
+    public async Task<BaseResponse> AuthUpdate(string userToken, AuthUpdateRequest? request)
+    {
+        if (request is null)
+        {
+            return new ErrorResponse("Invalid request");
+        }
+
+        try
+        {
+            var databaseOutput = await databaseService.UpdateUserDataAsync(jwtService, userToken, request);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
+        
+    }
 
 
 }

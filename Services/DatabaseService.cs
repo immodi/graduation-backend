@@ -16,6 +16,7 @@ using System.Threading.Tasks;
 
 public class DatabaseService(IUserRepository userRepository, IFileRepository fileRepository)
 {
+    // User methods
     public Task<DatabaseOutput> SignUpAsync(JwtService jwtService, AuthRequest request)
     {
         return userRepository.SignUpAsync(jwtService, request);
@@ -34,6 +35,11 @@ public class DatabaseService(IUserRepository userRepository, IFileRepository fil
     public Task<DatabaseOutput> ResetPasswordAsync(JwtService jwtService, ResetRequest request)
     {
         return userRepository.ResetPasswordAsync(jwtService, request);
+    }
+    
+    public Task<DatabaseOutput> UpdateUserDataAsync(JwtService jwtService, string userToken, AuthUpdateRequest request)
+    {
+        return userRepository.UpdateUserData(jwtService, userToken, request);
     }
     
     // File methods

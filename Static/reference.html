@@ -166,6 +166,36 @@
 }</pre>
 </div>
 
+
+
+<div class="endpoint">
+    <h2>Update User Username or Email</h2>
+    <h3>POST -> <a route="user/update">(Requires Authorization)</a></h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
+    <h3>Request Body:</h3>
+    <pre>{
+    "newUsername": "string",
+    "newEmail": "string",
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "username": "string",
+    "email": "string"
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
 <div class="endpoint">
     <h2>Compile</h2>
     <h3>POST -> <a route="compile"></a> (Requires Authorization)</h3>

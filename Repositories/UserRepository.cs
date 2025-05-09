@@ -21,6 +21,15 @@ public class UserRepository(SQLiteAsyncConnection database) : IUserRepository
         if (existingUser != null)
             return new DatabaseOutput(false, new ErrorResponse("Username already exists"));
 
+        
+        var existingUserWithEmail = await database.Table<User>()
+            .Where(u => u.Email == request.Email)
+            .FirstOrDefaultAsync();
+
+        if (existingUserWithEmail != null)
+            return new DatabaseOutput(false, new ErrorResponse("Username with that email already exists"));
+
+        
         var passwordHash = PasswordHasher.HashPassword(request.Password);
         var resetCode = RandomStringGenerator.GenerateRandomString();
 
@@ -92,6 +101,41 @@ public class UserRepository(SQLiteAsyncConnection database) : IUserRepository
             await database.UpdateAsync(user);
 
             return await SignInAsync(jwtService, new AuthRequest(user.Username, user.Email, request.NewPassword));
+        }
+        catch (Exception ex)
+        {
+            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed: {ex.Message}"){StatusCode = 500});
+        }
+    }
+
+    public async Task<DatabaseOutput> UpdateUserData(JwtService jwtService, string userToken, AuthUpdateRequest request)
+    {
+        try
+        {
+            var tokenOwner = jwtService.GetUsernameFromToken(userToken);
+            // Retrieve the user by username
+            var user = await database.Table<User>()
+                .Where(u => u.Username == tokenOwner)
+                .FirstOrDefaultAsync();
+              
+            if (user == null)
+            {
+                // User not found
+                return new DatabaseOutput(false, new ErrorResponse("User not found"));
+            }
+
+            if (request.Username != null)
+            {
+                user.Username = request.Username;
+            }
+
+            if (request.Email != null)
+            {
+                user.Email = request.Email;
+            }
+            
+            await database.UpdateAsync(user);
+            return new DatabaseOutput(true, new AuthUpdateResponse(user.Username, user.Email));
         }
         catch (Exception ex)
         {

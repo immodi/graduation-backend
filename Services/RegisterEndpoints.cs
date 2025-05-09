@@ -35,6 +35,8 @@ public static class WebApplicationExtension
         (await new AuthController(jwtService, databaseService).RequestResetPassword(authResetRequest)).ToResult());
         app.MapPost("/reset-password", async (JwtService jwtService, DatabaseService databaseService, [FromBody] ResetRequest resetRequest) => 
         (await new AuthController(jwtService, databaseService).ResetPassword(resetRequest)).ToResult());
+        app.MapPost("/user/update", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] AuthUpdateRequest authUpdateRequest) => 
+        (await new AuthController(jwtService, databaseService).AuthUpdate(userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim(), request: authUpdateRequest)).ToResult());
 
         
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
