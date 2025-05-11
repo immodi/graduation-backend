@@ -27,10 +27,10 @@ public class DockerService(DockerClient dockerClient, string language, string co
 
         try
         {
-            await dockerClient.Containers.StartContainerAsync(containerId, null);
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
 
+            await dockerClient.Containers.StartContainerAsync(containerId, null);
             using var logsStream = await dockerClient.Containers.GetContainerLogsAsync(containerId, false,
                 new ContainerLogsParameters
                 {

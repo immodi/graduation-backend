@@ -1,5 +1,8 @@
+using System.Net.WebSockets;
+using System.Text;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
+using backend.Helpers;
 using backend.Services;
 using Docker.DotNet;
 
@@ -7,6 +10,8 @@ namespace backend.Controllers;
 
 public class CompileController(DockerClient dockerClient)
 {
+    private readonly DockerAltService _dockerAltService = new(dockerClient);
+    
     public async Task<BaseResponse> Compile(CompileRequest? request)
     {
         if (request is null)
@@ -25,4 +30,11 @@ public class CompileController(DockerClient dockerClient)
             return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
         }
     }
+    public async Task HandleWebSocketAsync(WebSocket webSocket)
+    {
+        var buffer = new byte[1024 * 4];
+        await WebSocketHelpers.ProcessWebSocketMessagesAsync(webSocket, buffer, _dockerAltService);
+    }
+    
+    
 }

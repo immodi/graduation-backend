@@ -145,6 +145,21 @@ internal class AuthController(JwtService jwtService, DatabaseService databaseSer
         }
         
     }
+    
+    public async Task<BaseResponse> GetUserInfo(string userToken)
+    {
+        try
+        {
+            var databaseOutput = await databaseService.GetUserInfo(jwtService, userToken);
+            return databaseOutput.Response;
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            return new ErrorResponse("An error occured, please try again later"){ StatusCode = 500 };
+        }
+        
+    }
 
 
 }

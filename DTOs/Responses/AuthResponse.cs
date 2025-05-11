@@ -24,3 +24,9 @@ public record ResetData(
     [property: JsonPropertyName("email")] string Email,
     [property: JsonPropertyName("code")] string Code
 ): BaseResponse(200);
+
+public record UserInfoResponse(
+    [property: JsonPropertyName("username")] string Username,
+    [property: JsonPropertyName("email")] string Email
+): BaseResponse(200);
+

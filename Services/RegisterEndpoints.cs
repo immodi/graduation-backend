@@ -1,4 +1,6 @@
+using System.Net.WebSockets;
 using System.Reflection;
+using System.Text;
 using backend.Controllers;
 using backend.DTOs.Requests;
 using backend.DTOs.Responses;
@@ -37,6 +39,8 @@ public static class WebApplicationExtension
         (await new AuthController(jwtService, databaseService).ResetPassword(resetRequest)).ToResult());
         app.MapPost("/user/update", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService, [FromBody] AuthUpdateRequest authUpdateRequest) => 
         (await new AuthController(jwtService, databaseService).AuthUpdate(userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim(), request: authUpdateRequest)).ToResult());
+        app.MapGet("/user/info", async (HttpContext httpContext, JwtService jwtService, DatabaseService databaseService) => 
+        (await new AuthController(jwtService, databaseService).GetUserInfo(userToken: httpContext.Request.Headers.Authorization.ToString()["Bearer ".Length..].Trim())).ToResult()).RequireAuthorization();
 
         
         app.MapPost("/compile", async (DockerClient dockerClient, [FromBody] CompileRequest compileRequest) =>
@@ -65,6 +69,30 @@ public static class WebApplicationExtension
         (await new AiController(groqService).ChatWithTheAi(aiRequest)).ToResult());
         app.MapGet("/ai/models", (AiService groqService) => new AiController(groqService).GetAllAiModels());
 
+
+
+
+        // Handle /compile WebSocket connections
+        app.Use(async (context, next) =>
+        {
+            if (context.Request.Path == "/compile")
+            {
+                if (context.WebSockets.IsWebSocketRequest)
+                {
+                    var dockerClient = context.RequestServices.GetRequiredService<DockerClient>();
+                    using var webSocket = await context.WebSockets.AcceptWebSocketAsync();
+                    await new CompileController(dockerClient).HandleWebSocketAsync(webSocket);
+                }
+                else
+                {
+                    context.Response.StatusCode = 400;
+                }
+            }
+            else
+            {
+                await next();
+            }
+        });
         
         app.MapFallback(() => new ErrorResponse("Endpoint or Method not found"){StatusCode = 404}.ToResult());
     }

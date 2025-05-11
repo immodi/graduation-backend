@@ -27,9 +27,18 @@
                 return this.getAttribute('route') || '';
             },
             set(value) {
-                this.textContent = `${window.location.origin}/${value}`
-                this.href = `${window.location.origin}/${value}`
-                this.setAttribute('route', value || '');
+                if (!value.includes("+"))
+                {
+                    this.textContent = `${window.location.origin}/${value}`
+                    this.href = `${window.location.origin}/${value}`
+                    this.setAttribute('route', value || '');
+                } else {
+                    let wsOrigin = window.location.origin.replace(/^http/, 'ws');
+
+                    this.textContent = `${wsOrigin}/${value.split("+")[1]}`;
+                    this.href = `${wsOrigin}/${value.split("+")[1]}`;
+                    this.setAttribute('route', value.split("+")[1] || '');
+                }
             }
         });
 
@@ -196,6 +205,34 @@
 }</pre>
 </div>
 
+
+<div class="endpoint">
+    <h2>Get User's username and email</h2>
+    <h3>GET -> <a route="user/info">(Requires Authorization)</a></h3>
+    <div class="auth-note dark-mode">
+        Authorization Note:
+        <p>For endpoints that require authorization, the token must be provided in the HTTP header as follows:</p>
+        <pre>Authorization: Bearer {token}</pre>
+    </div>
+    <h3>Request Body:</h3>
+    <pre>{
+    <span style="font-style: italic">Empty Request</span>
+}</pre>
+    <h3>Response (200 OK):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "username": "string",
+    "email": "string"
+}</pre>
+    <h3>Response (400/500 Error):</h3>
+    <pre>{
+    "dateTime": "string",
+    "statusCode": number,
+    "errorMessage": "string"
+}</pre>
+</div>
+
 <div class="endpoint">
     <h2>Compile</h2>
     <h3>POST -> <a route="compile"></a> (Requires Authorization)</h3>
@@ -224,6 +261,34 @@
   "errorMessage": "string"
 }</pre>
 </div>
+
+<div class="endpoint">
+    <h2>WebSocket: Compile</h2>
+    <h3>WS -> <a route="ws+compile"></a></h3>
+    <p>Opens a WebSocket connection for compiling and interacting with code inside a Docker container in real-time.</p>
+
+    <h3>Request Message (JSON):</h3>
+    <pre>{
+    "type": "code" | "command" | "exit",
+    "language": "string",
+    "codeToRun": "string"
+}</pre>
+    <p>
+        <strong>type</strong>: One of:
+        <ul>
+            <li><code>Code</code> — Runs a code snippet in a Docker container.</li>
+            <li><code>Command</code> — Sends a command/input to an already running container.</li>
+            <li><code>Exit</code> — Closes the WebSocket connection cleanly.</li>
+        </ul>
+    </p>
+
+    <h3>Response:</h3>
+    <p>Every message sent back through the WebSocket is a raw text string — no JSON wrapping.</p>
+
+    <h4>Example Responses:</h4>
+    <pre>Hello, World</pre>
+</div>
+
 
     <div class="endpoint">
     <h2>Read All Files</h2>

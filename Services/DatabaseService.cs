@@ -42,6 +42,11 @@ public class DatabaseService(IUserRepository userRepository, IFileRepository fil
         return userRepository.UpdateUserData(jwtService, userToken, request);
     }
     
+    public Task<DatabaseOutput> GetUserInfo(JwtService jwtService, string userToken)
+    {
+        return userRepository.GetUserEmailAndUsername(jwtService, userToken);
+    }
+    
     // File methods
     public Task<DatabaseOutput> ReadFile(string token, JwtService jwt, int fileId) =>
         fileRepository.ReadFile(token, jwt, fileId);

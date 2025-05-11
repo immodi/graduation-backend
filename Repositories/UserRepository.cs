@@ -139,7 +139,31 @@ public class UserRepository(SQLiteAsyncConnection database) : IUserRepository
         }
         catch (Exception ex)
         {
-            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed: {ex.Message}"){StatusCode = 500});
+            return new DatabaseOutput(false, new ErrorResponse($"Password reset failed"){StatusCode = 500});
+        }
+    }
+
+    public async Task<DatabaseOutput> GetUserEmailAndUsername(JwtService jwtService, string userToken)
+    {
+        try
+        {
+            var tokenOwner = jwtService.GetUsernameFromToken(userToken);
+            // Retrieve the user by username
+            var user = await database.Table<User>()
+                .Where(u => u.Username == tokenOwner)
+                .FirstOrDefaultAsync();
+
+            if (user == null)
+            {
+                // User not found
+                return new DatabaseOutput(false, new ErrorResponse("User not found"));
+            }
+
+            return new DatabaseOutput(true, new UserInfoResponse(user.Username, user.Email));
+        }
+        catch (Exception)
+        {
+            return new DatabaseOutput(false, new ErrorResponse($"failed to get the username and email"){StatusCode = 500});
         }
     }
 }
