@@ -75,7 +75,7 @@ public static class WebApplicationExtension
         // Handle /compile WebSocket connections
         app.Use(async (context, next) =>
         {
-            if (context.Request.Path == "/compile")
+            if (context.Request.Path == "/compile-ws")
             {
                 if (context.WebSockets.IsWebSocketRequest)
                 {
