@@ -33,8 +33,7 @@ public class CompileController(DockerClient dockerClient)
     public async Task HandleWebSocketAsync(WebSocket webSocket)
     {
         var buffer = new byte[1024 * 4];
-        await WebSocketHelpers.ProcessWebSocketMessagesAsync(webSocket, buffer, _dockerAltService);
+        var process = new ProcessingWebSocketsClass();
+        await process.ProcessWebSocketMessagesAsync(webSocket, buffer, _dockerAltService, dockerClient);
     }
-    
-    
 }

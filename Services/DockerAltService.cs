@@ -4,9 +4,12 @@ using Docker.DotNet.Models;
 
 namespace backend.Services;
 
+public record DockerContainerOutput(
+    string ContainerId, MultiplexedStream? AttachedStream);
+
 public class DockerAltService(DockerClient dockerClient)
 {
-    public async Task<string> StartContainerAsync(string language, string codeToRun)
+    public async Task<DockerContainerOutput> StartContainerAsync(string language, string codeToRun)
     {
         if (!ProgrammingLanguages.Commands.TryGetValue(language, out var commandTemplate))
             throw new Exception("Unknown language: " + language);
@@ -25,14 +28,23 @@ public class DockerAltService(DockerClient dockerClient)
                 AutoRemove = false
             }
         };
+        
+        var attachParams = new ContainerAttachParameters
+        {
+            Stream = true,
+            Stdout = true,
+            Stderr = true
+        };
 
         var response = await dockerClient.Containers.CreateContainerAsync(containerConfig);
         var containerId = response.ID;
-
+        
         if (string.IsNullOrEmpty(containerId))
         {
             throw new Exception("Failed to create container for language: " + language);
         }
+        
+        var attachedStream = await dockerClient.Containers.AttachContainerAsync(containerId, false, attachParams);
 
         var started = await dockerClient.Containers.StartContainerAsync(containerId, null);
         if (!started)
@@ -40,7 +52,7 @@ public class DockerAltService(DockerClient dockerClient)
             throw new Exception("Failed to start container: " + containerId);
         }
 
-        return containerId;
+        return new DockerContainerOutput(containerId, attachedStream);
     }
 
     public async Task RunCodeInRunningContainerAsync(string language, string codeToRun, string containerId)
@@ -52,29 +64,30 @@ public class DockerAltService(DockerClient dockerClient)
         await SendInputToContainerAsync(containerId, string.Join(" ", commandArray));
     }
 
-    public async Task<DockerStdOut> GetContainerStdoutAsync(string containerId)
+    public async Task<DockerStdOut> GetContainerStdoutAsync(MultiplexedStream attachedStream)
     {
-        // Get container logs (stdout)
-        var logOptions = new ContainerLogsParameters
-        {
-            ShowStdout = true,
-            ShowStderr = true,
-            Tail = "all"
-        };
-    
-        using var multiplexedStream = await dockerClient.Containers.GetContainerLogsAsync(containerId, false, logOptions);
-   
         using var stdout = new MemoryStream();
         using var stderr = new MemoryStream();
-            
+
+        var buffer = new byte[4096];
+        var cancellationSource = new CancellationTokenSource();
+        cancellationSource.CancelAfter(TimeSpan.FromMilliseconds(100)); // short read timeout
+
         try
         {
-            await multiplexedStream.CopyOutputToAsync(null, stdout, stderr, new CancellationToken(false));
-        }  catch (OperationCanceledException)
-        {
-            await dockerClient.Containers.StopContainerAsync(containerId, new ContainerStopParameters());
+            while (true)
+            {
+                var bytesRead = await attachedStream.ReadOutputAsync(buffer, 0, buffer.Length, cancellationSource.Token);
+                if (bytesRead.Count <= 0) break;
+
+                stdout.Write(buffer, 0, bytesRead.Count);
+            }
         }
-        
+        catch (OperationCanceledException)
+        {
+            // Done reading what's available
+        }
+
         stdout.Position = 0;
         stderr.Position = 0;
 
@@ -84,7 +97,6 @@ public class DockerAltService(DockerClient dockerClient)
         var stdoutOutput = await stdoutReader.ReadToEndAsync();
         var stderrOutput = await stderrReader.ReadToEndAsync();
 
-        
         return new DockerStdOut(stdoutOutput, stderrOutput);
     }
     
