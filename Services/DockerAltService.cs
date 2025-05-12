@@ -1,3 +1,4 @@
+using System.Text;
 using backend.Helpers;
 using Docker.DotNet;
 using Docker.DotNet.Models;
@@ -15,7 +16,7 @@ public class DockerAltService(DockerClient dockerClient)
             throw new Exception("Unknown language: " + language);
 
         var commandArray = commandTemplate.Command(codeToRun);
-        
+
         var containerConfig = new CreateContainerParameters
         {
             Image = commandTemplate.ImageName,
@@ -28,7 +29,7 @@ public class DockerAltService(DockerClient dockerClient)
                 AutoRemove = false
             }
         };
-        
+
         var attachParams = new ContainerAttachParameters
         {
             Stream = true,
@@ -36,24 +37,56 @@ public class DockerAltService(DockerClient dockerClient)
             Stderr = true
         };
 
+        // Create the container
         var response = await dockerClient.Containers.CreateContainerAsync(containerConfig);
         var containerId = response.ID;
-        
+
         if (string.IsNullOrEmpty(containerId))
         {
             throw new Exception("Failed to create container for language: " + language);
         }
-        
+
+        // Attach to the container's output stream
         var attachedStream = await dockerClient.Containers.AttachContainerAsync(containerId, false, attachParams);
 
+        // Start the container
         var started = await dockerClient.Containers.StartContainerAsync(containerId, null);
         if (!started)
         {
             throw new Exception("Failed to start container: " + containerId);
         }
+        
+        // Infinite loop to check for output on stdout
+        var initialOutput = new StringBuilder(); // Use StringBuilder to accumulate output
+        var buffer = new byte[4096];
 
+        while (true)
+        {
+            // Read the output
+            var bytesRead = await attachedStream.ReadOutputAsync(buffer, 0, buffer.Length, CancellationToken.None);
+
+            // If data is received, process it
+            if (bytesRead.Count > 0)
+            {
+                var output = Encoding.UTF8.GetString(buffer, 0, bytesRead.Count).Trim();
+        
+                if (!string.IsNullOrEmpty(output))
+                {
+                    initialOutput.Append(output); // Accumulate the output
+
+                    // Break the loop if any output is captured
+                    break;
+                }
+            }
+
+            // Optionally, add a small delay to prevent maxing out CPU usage
+            await Task.Delay(100);
+        }
+                
+        // Return the container ID, output stream, and initial output
         return new DockerContainerOutput(containerId, attachedStream);
     }
+
 
     public async Task RunCodeInRunningContainerAsync(string language, string codeToRun, string containerId)
     {
@@ -64,42 +97,64 @@ public class DockerAltService(DockerClient dockerClient)
         await SendInputToContainerAsync(containerId, string.Join(" ", commandArray));
     }
 
-    public async Task<DockerStdOut> GetContainerStdoutAsync(MultiplexedStream attachedStream)
+    public async Task<DockerStdOut> GetContainerLogsAsync(string containerId)
     {
-        using var stdout = new MemoryStream();
-        using var stderr = new MemoryStream();
-
-        var buffer = new byte[4096];
-        var cancellationSource = new CancellationTokenSource();
-        cancellationSource.CancelAfter(TimeSpan.FromMilliseconds(100)); // short read timeout
-
-        try
+        // Set up parameters for fetching logs
+        var logParams = new ContainerLogsParameters
         {
-            while (true)
-            {
-                var bytesRead = await attachedStream.ReadOutputAsync(buffer, 0, buffer.Length, cancellationSource.Token);
-                if (bytesRead.Count <= 0) break;
+            ShowStdout = true,  // Capture stdout
+            ShowStderr = true,  // Capture stderr
+            Tail = "all",       // Get all logs (or specify a number for recent logs)
+            Follow = false      // Don't continuously stream logs, just grab them once
+        };
 
-                stdout.Write(buffer, 0, bytesRead.Count);
-            }
-        }
-        catch (OperationCanceledException)
-        {
-            // Done reading what's available
-        }
+        // Fetch the logs from the container
+        var logs = await dockerClient.Containers.GetContainerLogsAsync(containerId, logParams);
 
-        stdout.Position = 0;
-        stderr.Position = 0;
+        // Convert the logs into a string and return
+        using var reader = new StreamReader(logs);
+        var logOutput = await reader.ReadToEndAsync();
 
-        using var stdoutReader = new StreamReader(stdout);
-        using var stderrReader = new StreamReader(stderr);
-
-        var stdoutOutput = await stdoutReader.ReadToEndAsync();
-        var stderrOutput = await stderrReader.ReadToEndAsync();
-
-        return new DockerStdOut(stdoutOutput, stderrOutput);
+        // Return the logs (stdout + stderr)
+        return new DockerStdOut(logOutput, string.Empty); // stderr is empty if not fetched
     }
-    
+
+    // public async Task<DockerStdOut> GetContainerStdoutAsync(MultiplexedStream attachedStream)
+    // {
+    //     using var stdout = new MemoryStream();
+    //     using var stderr = new MemoryStream();
+    //
+    //     var buffer = new byte[4096];
+    //     var cancellationSource = new CancellationTokenSource();
+    //     cancellationSource.CancelAfter(TimeSpan.FromMilliseconds(100)); // short read timeout
+    //
+    //     try
+    //     {
+    //         while (true)
+    //         {
+    //             var bytesRead = await attachedStream.ReadOutputAsync(buffer, 0, buffer.Length, cancellationSource.Token);
+    //             if (bytesRead.Count <= 0) break;
+    //
+    //             stdout.Write(buffer, 0, bytesRead.Count);
+    //         }
+    //     }
+    //     catch (OperationCanceledException)
+    //     {
+    //         // Done reading what's available
+    //     }
+    //
+    //     stdout.Position = 0;
+    //     stderr.Position = 0;
+    //
+    //     using var stdoutReader = new StreamReader(stdout);
+    //     using var stderrReader = new StreamReader(stderr);
+    //
+    //     var stdoutOutput = await stdoutReader.ReadToEndAsync();
+    //     var stderrOutput = await stderrReader.ReadToEndAsync();
+    //
+    //     return new DockerStdOut(stdoutOutput, stderrOutput);
+    // }
+    //
     public async Task<bool> SendInputToContainerAsync(string containerId, string input)
     {
         try

@@ -104,7 +104,9 @@ namespace backend.Helpers
                             // Start a new Docker container if none is running or the existing one isn't active
                             Console.WriteLine("im here");
                             containerData = await dockerAltService.StartContainerAsync(request.Language, request.CodeToRun);
-                            var stdResp = await dockerAltService.GetContainerStdoutAsync(containerData.AttachedStream!);
+                            // var stdResp = await dockerAltService.GetContainerStdoutAsync(containerData.AttachedStream!);
+                            var stdResp = await dockerAltService.GetContainerLogsAsync(containerData.ContainerId);
+
                             var stdOut = $"{stdResp.StdOut} {stdResp.StdErr}";
 
                             // Send stdout response to WebSocket
@@ -124,7 +126,8 @@ namespace backend.Helpers
                         var isSent = await dockerAltService.SendInputToContainerAsync(containerData.ContainerId, request.CodeToRun);
                         if (isSent)
                         {
-                            var responseMessage = await dockerAltService.GetContainerStdoutAsync(containerData.AttachedStream);
+                            // var responseMessage = await dockerAltService.GetContainerStdoutAsync(containerData.AttachedStream);
+                            var responseMessage = await dockerAltService.GetContainerLogsAsync(containerData.ContainerId);
                             var responseBuffer = Encoding.UTF8.GetBytes(responseMessage.StdOut);
 
                             // Send the response from the container's stdout
